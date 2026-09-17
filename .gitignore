@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+build/
+dist/
+*.egg-info/
+
+# Ambientes virtuais
+.venv/
+venv/
+
+# uv
+.uv-cache/
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Dados brutos da Olist: baixados do Kaggle por `make data` e conferidos pelo
+# manifesto com SHA-256 em data/manifest.json, por isso nao precisam ser versionados
+data/raw/*
+!data/raw/.gitkeep
+
+# A base de avaliacoes, os documentos, os indices e o conjunto de avaliacao ficam
+# versionados: deixam os notebooks e a API reproduziveis sem baixar nem recalcular
+
+# Caches locais (modelos baixados, respostas do LLM em desenvolvimento)
+.cache/
+
+# Logs e temporarios
+*.log
+tmp/
+*.tmp
+.pytest_cache/
+.ruff_cache/
+
+# Variaveis de ambiente locais: a chave da API nunca entra no repositorio
+.env
+.env.*
+!.env.example
+
+# Temporarios do LibreOffice
+.~lock.*#

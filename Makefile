@@ -1,0 +1,57 @@
+.PHONY: help setup lint test requirements data base documentos index notebooks clean
+
+PY = uv run python
+
+help:
+	@echo "Setup e qualidade:"
+	@echo "  setup         instala as dependencias com uv (torch na versao CPU)"
+	@echo "  lint          roda o ruff"
+	@echo "  test          roda a suite de testes"
+	@echo "  requirements  exporta requirements.txt a partir do uv.lock"
+	@echo ""
+	@echo "Base de conhecimento (na ordem):"
+	@echo "  data          baixa a base da Olist do Kaggle para data/raw e grava o manifesto"
+	@echo "  base          monta a base de avaliacoes com os metadados do pedido"
+	@echo "  documentos    limpa e normaliza os comentarios e gera os documentos do indice"
+	@echo "  index         constroi o indice lexical (BM25), o vetorial (FAISS) e o mapa de temas"
+	@echo ""
+	@echo "Notebooks:"
+	@echo "  notebooks     executa os notebooks de ponta a ponta, na ordem"
+	@echo "  clean         limpa caches"
+
+setup:
+	uv sync
+
+lint:
+	uv run ruff check .
+
+test:
+	uv run pytest -q
+
+requirements:
+	uv export --no-dev --no-hashes --no-emit-project -o requirements.txt
+	printf '%s\n' '' '# torch na versao CPU vem do indice do PyTorch' \
+		'--extra-index-url https://download.pytorch.org/whl/cpu' >> requirements.txt
+
+data:
+	$(PY) -m src.data.download
+
+base:
+	$(PY) -m src.data.base
+
+documentos:
+	$(PY) -m src.preprocessing.documentos
+
+index:
+	$(PY) -m src.indexing.lexical
+	$(PY) -m src.indexing.vetorial
+	$(PY) -m src.indexing.temas
+
+notebooks:
+	for nb in notebooks/0*.ipynb; do \
+		uv run jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=-1 $$nb || exit 1; \
+	done
+
+clean:
+	rm -rf .pytest_cache .ruff_cache
+	find . -name __pycache__ -type d -prune -exec rm -rf {} +
