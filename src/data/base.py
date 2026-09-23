@@ -20,11 +20,22 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from src.data.olist import RAW_DIR, read_table
 
 OUTPUT = Path("data/processed/avaliacoes.parquet")
+
+REGION_BY_STATE = {
+    **dict.fromkeys(["AC", "AM", "AP", "PA", "RO", "RR", "TO"], "Norte"),
+    **dict.fromkeys(["AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE"], "Nordeste"),
+    **dict.fromkeys(["DF", "GO", "MS", "MT"], "Centro-Oeste"),
+    **dict.fromkeys(["ES", "MG", "RJ", "SP"], "Sudeste"),
+    **dict.fromkeys(["PR", "RS", "SC"], "Sul"),
+}
+
+CANCELED_STATUSES = {"canceled", "unavailable"}
 
 REVIEW_COLUMNS = [
     "review_id", "review_score", "review_comment_title", "review_comment_message",
@@ -109,6 +120,37 @@ def _aggregate_items(pairs: pd.DataFrame, tables: dict[str, pd.DataFrame]) -> pd
     return agg
 
 
+def add_delivery_metadata(base: pd.DataFrame) -> pd.DataFrame:
+    """Entrega, atraso, prazo, periodo da compra e momento da resposta."""
+    df = base.copy()
+    purchase = df["order_purchase_timestamp"]
+    delivered_at = df["order_delivered_customer_date"]
+    estimated = df["order_estimated_delivery_date"]
+
+    df["delivered"] = delivered_at.notna()
+    df["delivery_days"] = (delivered_at - purchase).dt.total_seconds() / 86400
+    df["estimated_days"] = (estimated - purchase).dt.total_seconds() / 86400
+    # a estimativa vem sem hora (00:00); o atraso e contado em dias de calendario
+    df["delay_days"] = (delivered_at.dt.normalize() - estimated.dt.normalize()).dt.days
+    df["is_late"] = (df["delay_days"] > 0).astype("boolean").mask(~df["delivered"])
+
+    canceled = df["order_status"].isin(CANCELED_STATUSES)
+    df["delivery_status"] = np.select(
+        [df["delivered"] & (df["delay_days"] <= 0), df["delivered"], canceled],
+        ["no prazo", "atrasada", "cancelada"],
+        default="nao entregue",
+    )
+    df["answered_before_delivery"] = ~df["delivered"] | (
+        df["review_answer_timestamp"] < delivered_at)
+
+    df["purchase_year"] = purchase.dt.year.astype("Int64")
+    df["purchase_month"] = purchase.dt.strftime("%Y-%m")
+    df["answer_days"] = (
+        df["review_answer_timestamp"] - df["review_creation_date"]).dt.total_seconds() / 86400
+    df["customer_region"] = df["customer_state"].map(REGION_BY_STATE)
+    return df
+
+
 def build_base(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
     reviews = tables["order_reviews"]
     pairs = reviews[["review_id", "order_id"]].drop_duplicates()
@@ -133,6 +175,7 @@ def build_base(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
                       ("review_comment_title", "has_title")]:
         base[flag] = base[col].fillna("").str.strip().ne("")
 
+    base = add_delivery_metadata(base)
     return base.reset_index()
 
 
