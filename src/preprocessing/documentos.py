@@ -6,7 +6,8 @@ Uso:
 Cada avaliacao com titulo ou comentario vira um documento (sem fragmentacao, D01): o
 comentario mais longo da base tem 208 caracteres. O texto original fica preservado para
 exibicao; o texto limpo e o normalizado sao gerados por `src.preprocessing.limpeza`.
-Avaliacoes cujo texto nao tem nenhuma letra depois de normalizado ficam fora.
+Avaliacoes cujo texto nao tem nenhuma letra depois de normalizado ficam fora. Textos
+identicos depois de normalizados compartilham um doc_id (`src.preprocessing.deduplicacao`).
 """
 
 from __future__ import annotations
@@ -15,6 +16,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.preprocessing.deduplicacao import add_doc_ids
 from src.preprocessing.limpeza import clean_text, has_content, join_title_comment, normalize
 
 BASE = Path("data/processed/avaliacoes.parquet")
@@ -40,14 +42,15 @@ def build_documents(base: pd.DataFrame) -> pd.DataFrame:
     df["n_words"] = df["text_clean"].str.split().str.len()
     cols = ["review_id", "review_comment_title", "review_comment_message", "text_clean",
             "text_norm", "n_chars", "n_words"] + METADATA
-    return df[cols].reset_index(drop=True)
+    return add_doc_ids(df[cols].reset_index(drop=True))
 
 
 def main() -> None:
     docs = build_documents(pd.read_parquet(BASE))
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     docs.to_parquet(OUTPUT, index=False, compression="zstd")
-    print(f"{len(docs):,} documentos -> {OUTPUT}")
+    print(f"{len(docs):,} avaliacoes com texto, {docs['doc_id'].nunique():,} textos distintos "
+          f"-> {OUTPUT}")
 
 
 if __name__ == "__main__":
