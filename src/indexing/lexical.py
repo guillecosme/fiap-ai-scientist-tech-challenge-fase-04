@@ -21,6 +21,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from rank_bm25 import BM25Okapi
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from src.preprocessing.deduplicacao import unique_docs
 from src.preprocessing.tokenizacao import tokenize
@@ -87,6 +88,31 @@ class LexicalIndex:
         params = json.loads(params_path.read_text())
         return cls(df["doc_id"].tolist(), [list(t) for t in df["tokens"]],
                    k1=params["k1"], b=params["b"])
+
+
+class TfidfIndex:
+    """TF-IDF com similaridade de cosseno sobre os mesmos radicais, so para comparacao.
+
+    Difere do BM25 em dois pontos que importam para textos curtos: nao satura a
+    frequencia do termo e normaliza o tamanho do documento pela norma do vetor.
+    """
+
+    def __init__(self, doc_ids: list[str], tokens: list[list[str]]):
+        self.doc_ids = doc_ids
+        self.vectorizer = TfidfVectorizer(analyzer=lambda toks: toks, sublinear_tf=True)
+        self.matrix = self.vectorizer.fit_transform(tokens)
+
+    @classmethod
+    def from_lexical(cls, index: LexicalIndex) -> TfidfIndex:
+        return cls(index.doc_ids, index.tokens)
+
+    def scores(self, query: str) -> np.ndarray:
+        q = self.vectorizer.transform([tokenize(query)])
+        return (self.matrix @ q.T).toarray().ravel()
+
+    def search(self, query: str, k: int = 10,
+               allowed: np.ndarray | None = None) -> list[tuple[str, float]]:
+        return [(self.doc_ids[i], s) for i, s in _top_k(self.scores(query), k, allowed)]
 
 
 def main() -> None:
