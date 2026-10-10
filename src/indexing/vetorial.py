@@ -9,6 +9,12 @@ os vetores sao normalizados, entao o produto interno e o cosseno.
 
 O texto que vai ao modelo e o texto limpo (D03), uma vez por doc_id (D04). Os vetores
 ficam em disco em float16, metade do tamanho, e voltam para float32 na carga.
+
+O indice e um FAISS IndexFlatIP (D06): busca exata por produto interno. Com cerca de
+35 mil vetores a busca exata leva milissegundos, e um indice aproximado (HNSW, IVF)
+so trocaria precisao por uma velocidade que nao faz falta nesta escala. O indice e
+montado na carga a partir dos vetores; os filtros por metadado chegam como mascara de
+entradas permitidas e viram um seletor de ids do FAISS.
 """
 
 from __future__ import annotations
@@ -18,6 +24,7 @@ import os
 from functools import cache
 from pathlib import Path
 
+import faiss
 import numpy as np
 import pandas as pd
 
@@ -66,11 +73,46 @@ def load_embeddings(path: Path = EMBEDDINGS) -> tuple[list[str], np.ndarray]:
     return data["doc_ids"].tolist(), vectors
 
 
+class VectorIndex:
+    def __init__(self, doc_ids: list[str], vectors: np.ndarray):
+        self.doc_ids = list(doc_ids)
+        self.vectors = np.ascontiguousarray(vectors, dtype=np.float32)
+        self.index = faiss.IndexFlatIP(self.vectors.shape[1])
+        self.index.add(self.vectors)
+
+    @classmethod
+    def load(cls, path: Path = EMBEDDINGS) -> VectorIndex:
+        return cls(*load_embeddings(path))
+
+    def __len__(self) -> int:
+        return len(self.doc_ids)
+
+    def scores(self, query: str | np.ndarray) -> np.ndarray:
+        """Cosseno da pergunta com todas as entradas, na ordem de doc_ids."""
+        q = embed([query])[0] if isinstance(query, str) else query
+        return self.vectors @ q
+
+    def search(self, query: str | np.ndarray, k: int = 10,
+               allowed: np.ndarray | None = None) -> list[tuple[str, float]]:
+        q = embed([query]) if isinstance(query, str) else query.reshape(1, -1)
+        params = None
+        if allowed is not None:
+            ids = np.flatnonzero(allowed).astype("int64")
+            if len(ids) == 0:
+                return []
+            params = faiss.SearchParameters(sel=faiss.IDSelectorBatch(ids))
+            k = min(k, len(ids))
+        dist, idx = self.index.search(q.astype(np.float32), min(k, len(self)), params=params)
+        return [(self.doc_ids[i], float(d)) for d, i in zip(dist[0], idx[0], strict=True)
+                if i >= 0]
+
+
 def main() -> None:
     doc_ids, vectors = build_embeddings(pd.read_parquet(DOCS))
     save_embeddings(doc_ids, vectors)
     meta = {"model": MODEL_NAME, "dim": int(vectors.shape[1]), "n_docs": len(doc_ids),
-            "normalized": True, "dtype_on_disk": "float16"}
+            "normalized": True, "dtype_on_disk": "float16", "faiss_index": "IndexFlatIP",
+            "text_field": "text_clean", "doc_order": "unique_docs (doc_id ascendente)"}
     (INDEX_DIR / "embeddings.json").write_text(json.dumps(meta, indent=2) + "\n")
     print(f"{len(doc_ids):,} embeddings de {vectors.shape[1]} dimensoes -> {EMBEDDINGS}")
 
