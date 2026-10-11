@@ -1,0 +1,10 @@
+{
+  "model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+  "dim": 384,
+  "n_docs": 34889,
+  "normalized": true,
+  "dtype_on_disk": "float16",
+  "faiss_index": "IndexFlatIP",
+  "text_field": "text_clean",
+  "doc_order": "unique_docs (doc_id ascendente)"
+}
