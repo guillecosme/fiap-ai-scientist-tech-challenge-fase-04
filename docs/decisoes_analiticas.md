@@ -15,6 +15,14 @@ Registro das decisões do projeto, com o motivo, a evidência e o notebook ou m�
 | D04 | Textos idênticos depois de normalizados compartilham uma entrada do índice, com a contagem; o filtro por metadado é aplicado por avaliação | 8.230 avaliações (19,6% das com texto) estão em 1.026 textos repetidos, curtos (mediana de 22 caracteres). 93% desses grupos misturam categorias e 51% misturam notas, por isso o filtro não pode ser aplicado ao grupo | notebook 02, `src/preprocessing/deduplicacao.py` |
 | D22 | As negações "não", "nem" e "sem" ficam no índice lexical, apesar de estarem na lista de stopwords do NLTK | "não" é o termo que mais separa notas baixas e altas (61% dos comentários de nota 1 e 2 contra 7% dos de nota 4 e 5); sem ele, "não recebi" e "recebi" seriam a mesma consulta | notebook 02, `src/preprocessing/tokenizacao.py` |
 
+## Mapa de temas
+
+| # | Decisão | Motivo e evidência | Onde |
+|---|---|---|---|
+| D23 | Dois mapas de temas, por polaridade: textos com nota média até 3 (problemas) e acima de 3 (elogios) | num modelo único, tópicos de entrega juntavam "não foi entregue" e "chegou antes do prazo", porque o embedding pesa pouco a polaridade; só 9,2% dos textos têm nota média estritamente entre 2 e 4, então o corte quase não depende do ponto escolhido | notebook 04, `src/indexing/temas.py` |
+| D24 | BERTopic em vez de LDA para o mapa de temas | coerência c_v média de 0,50 e 0,52 (BERTopic) contra 0,46 e 0,44 (LDA), sem significância estatística (p = 0,54 e 0,10); o LDA mistura assuntos em textos de 10 palavras e o BERTopic reaproveita os embeddings da busca. Limitação declarada: a métrica não separa os dois métodos | notebook 04 |
+| D10 | Perguntas de frequência respondidas com a contagem por tema dentro do recorte, feita em código | o top-10 recuperado não sustenta "principais problemas" sobre 42 mil textos; o mapa dá a ordem de grandeza (pedido não recebido: 40% das avaliações de problema; defeito e produto errado: 18%; pedido incompleto: 14%) | notebook 04, `theme_frequency` |
+
 ## Recuperação
 
 | # | Decisão | Motivo e evidência | Onde |

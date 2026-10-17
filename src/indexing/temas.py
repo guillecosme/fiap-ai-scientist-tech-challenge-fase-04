@@ -1,7 +1,7 @@
 """Mapa de temas das avaliacoes com BERTopic, separado por polaridade.
 
 Uso:
-    python -m src.indexing.temas    # grava data/index/temas.parquet
+    python -m src.indexing.temas    # grava data/index/temas.parquet e reports/temas.csv
 
 Dois modelos, um por polaridade (D23): textos cuja nota media e ate 3 (problemas) e
 textos com nota media acima de 3 (elogios). Num modelo unico, o mesmo assunto juntava
@@ -27,6 +27,7 @@ from src.preprocessing.tokenizacao import stopwords
 
 DOCS = Path("data/processed/documentos.parquet")
 THEMES = Path("data/index/temas.parquet")
+REPORT = Path("reports/temas.csv")
 SEED = 42
 
 # parametros por lado: tamanho minimo do grupo no HDBSCAN e numero final de topicos
@@ -118,14 +119,123 @@ def coherence_cv(topics: list[list[str]], texts: list[list[str]]) -> list[float]
     return cm.get_coherence_per_topic()
 
 
+# topico fino -> (tema nomeado, palavra que precisa estar entre as 10 do topico). A
+# palavra protege contra uma numeracao diferente em outra maquina: se nao bater, o
+# topico vira "Outros" e o aviso aparece no log.
+THEME_MAP = {
+    "problema": {
+        -1: ("Outros problemas", None),
+        0: ("Pedido não recebido", "recebi"),
+        6: ("Pedido não recebido", "recebi"),
+        8: ("Pedido não recebido", "recebi"),
+        11: ("Pedido não recebido", "aguardando"),
+        12: ("Pedido não recebido", "aguardando"),
+        1: ("Pedido incompleto, faltando itens", "apenas"),
+        9: ("Pedido incompleto, faltando itens", "faltando"),
+        14: ("Pedido incompleto, faltando itens", "cortina"),
+        2: ("Defeito, produto errado ou má qualidade", "qualidade"),
+        16: ("Defeito, produto errado ou má qualidade", "defeito"),
+        18: ("Defeito, produto errado ou má qualidade", "qualidade"),
+        10: ("Defeito, produto errado ou má qualidade", "relogio"),
+        5: ("Acessórios eletrônicos que não funcionam", "celular"),
+        4: ("Cor, tamanho ou aparência diferente do anúncio", "cor"),
+        13: ("Cor, tamanho ou aparência diferente do anúncio", "tamanho"),
+        7: ("Atraso e prazo de entrega longo", "prazo"),
+        17: ("Atraso e prazo de entrega longo", "natal"),
+        15: ("Descaso da loja com o cliente", "cliente"),
+        3: ("Satisfeito, com ressalvas", "bom"),
+    },
+    "elogio": {
+        -1: ("Outros elogios", None),
+        0: ("Produto e entrega conforme o combinado", "produto"),
+        1: ("Entrega antes ou dentro do prazo", "antes"),
+        6: ("Entrega antes ou dentro do prazo", "prazo"),
+        3: ("Entrega rápida", "rapida"),
+        2: ("Elogio curto e genérico", "bom"),
+        12: ("Elogio curto e genérico", "10"),
+        8: ("Beleza e acabamento do produto", "relogio"),
+        10: ("Beleza e acabamento do produto", "mochila"),
+        13: ("Beleza e acabamento do produto", "cortina"),
+        7: ("Atendimento, site e confiança na loja", "atendimento"),
+        11: ("Atendimento, site e confiança na loja", "site"),
+        4: ("Satisfeito, com ressalvas", "ainda"),
+        5: ("Satisfeito, com ressalvas", "correios"),
+        9: ("Satisfeito, com ressalvas", "cor"),
+    },
+}
+
+
+def name_topics(assign: pd.DataFrame, models: dict) -> pd.DataFrame:
+    out = assign.copy()
+    names = []
+    for side, topic in zip(out["polaridade"], out["topico"], strict=True):
+        theme, word = THEME_MAP[side].get(topic, (None, None))
+        names.append(theme or f"Outros {'problemas' if side == 'problema' else 'elogios'}")
+    out["tema"] = names
+    for side, mapping in THEME_MAP.items():
+        for topic, (_theme, word) in mapping.items():
+            if word and word not in topic_words(models[side], topic):
+                warnings.warn(f"{side} {topic}: '{word}' fora das palavras do topico; "
+                              f"confira o THEME_MAP", stacklevel=2)
+                out.loc[(out["polaridade"] == side) & (out["topico"] == topic),
+                        "tema"] = f"Outros {'problemas' if side == 'problema' else 'elogios'}"
+    return out
+
+
+def theme_report(themes: pd.DataFrame, docs: pd.DataFrame, models: dict) -> pd.DataFrame:
+    rev = docs.merge(themes, on="doc_id")
+    rev["nao_recebeu"] = rev["delivery_status"].isin(["nao entregue", "cancelada"]) | rev[
+        "answered_before_delivery"]
+    words = {}
+    for (side, theme), g in themes.groupby(["polaridade", "tema"]):
+        topics = g["topico"].value_counts().index
+        ws = []
+        for t in topics:
+            ws += [w for w in topic_words(models[side], t, 6) if w not in ws]
+        words[(side, theme)] = ", ".join(ws[:10])
+    rep = rev.groupby(["polaridade", "tema"]).agg(
+        avaliacoes=("review_id", "size"), textos=("doc_id", "nunique"),
+        nota_media=("review_score", "mean"),
+        pct_atrasada=("delivery_status", lambda s: 100 * (s == "atrasada").mean()),
+        pct_nao_recebeu=("nao_recebeu", lambda s: 100 * s.mean()),
+    ).round(2).reset_index()
+    rep["pct_do_lado"] = (100 * rep["avaliacoes"] / rep.groupby("polaridade")[
+        "avaliacoes"].transform("sum")).round(1)
+    rep["palavras"] = [words[(s, t)] for s, t in zip(rep["polaridade"], rep["tema"],
+                                                     strict=True)]
+    return rep.sort_values(["polaridade", "avaliacoes"], ascending=[False, False])
+
+
+def load_themes(path: Path = THEMES) -> pd.DataFrame:
+    return pd.read_parquet(path)
+
+
+def theme_frequency(docs: pd.DataFrame, themes: pd.DataFrame,
+                    mask: pd.Series | None = None) -> pd.DataFrame:
+    """Contagem de avaliacoes por tema dentro de um recorte (D10).
+
+    A frequencia sai da base inteira filtrada, nao do top-k recuperado: e o que permite
+    responder "quais os principais problemas" com numeros.
+    """
+    sel = docs if mask is None else docs[mask]
+    rev = sel[["review_id", "doc_id"]].merge(themes[["doc_id", "polaridade", "tema"]],
+                                             on="doc_id")
+    freq = rev.groupby(["polaridade", "tema"]).size().rename("avaliacoes").reset_index()
+    freq["pct"] = (100 * freq["avaliacoes"] / len(rev)).round(1) if len(rev) else 0.0
+    return freq.sort_values("avaliacoes", ascending=False).reset_index(drop=True)
 
 
 def main() -> None:
     docs = pd.read_parquet(DOCS)
     assign, models = fit_topics(docs)
+    themes = name_topics(assign, models)
     THEMES.parent.mkdir(parents=True, exist_ok=True)
-    assign.to_parquet(THEMES, index=False)
-    print(assign.groupby("polaridade")["topico"].nunique().to_string())
+    themes.to_parquet(THEMES, index=False)
+    REPORT.parent.mkdir(parents=True, exist_ok=True)
+    report = theme_report(themes, docs, models)
+    report.to_csv(REPORT, index=False)
+    print(report[["polaridade", "tema", "avaliacoes", "pct_do_lado", "nota_media"]]
+          .to_string(index=False))
 
 
 if __name__ == "__main__":
