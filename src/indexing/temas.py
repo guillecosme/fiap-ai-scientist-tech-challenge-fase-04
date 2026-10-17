@@ -92,6 +92,30 @@ def topic_words(model, topic: int, n: int = 10) -> list[str]:
     return [w for w, _ in (model.get_topic(topic) or [])[:n]]
 
 
+def lda_topics(texts: list[list[str]], n_topics: int, passes: int = 10):
+    """LDA (gensim) como linha de base: devolve as 10 palavras de cada topico."""
+    from gensim.corpora import Dictionary
+    from gensim.models import LdaModel
+
+    dictionary = Dictionary(texts)
+    dictionary.filter_extremes(no_below=5, no_above=0.5)
+    corpus = [dictionary.doc2bow(t) for t in texts]
+    lda = LdaModel(corpus, id2word=dictionary, num_topics=n_topics, passes=passes,
+                   random_state=SEED, alpha="auto", eta="auto")
+    return [[w for w, _ in lda.show_topic(k, topn=10)] for k in range(n_topics)], lda
+
+
+def coherence_cv(topics: list[list[str]], texts: list[list[str]]) -> list[float]:
+    """Coerencia c_v de cada topico (palavras unicas, sem bigramas)."""
+    from gensim.corpora import Dictionary
+    from gensim.models import CoherenceModel
+
+    dictionary = Dictionary(texts)
+    clean = [[w for w in t if w in dictionary.token2id] for t in topics]
+    clean = [t for t in clean if len(t) >= 2]
+    cm = CoherenceModel(topics=clean, texts=texts, dictionary=dictionary, coherence="c_v",
+                        processes=1)
+    return cm.get_coherence_per_topic()
 
 
 
