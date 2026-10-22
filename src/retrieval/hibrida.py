@@ -1,4 +1,4 @@
-"""Recuperacao: filtro, BM25 e vetorial e fusao RRF.
+"""Recuperacao: filtro, BM25 e vetorial, fusao RRF, re-ranking e MMR.
 
 Fluxo de `Retriever.retrieve`:
 1. filtro por metadado sobre as avaliacoes; viram mascara de entradas do indice (D09);
@@ -6,10 +6,12 @@ Fluxo de `Retriever.retrieve`:
    permitidas (D07). Com HyDE, a busca vetorial usa o embedding de uma avaliacao
    hipotetica gerada pelo LLM em vez do embedding da pergunta;
 3. Reciprocal Rank Fusion com k = 60: score = soma de 1 / (60 + posicao) nas duas
-   listas. Usa so a posicao, entao nao precisa calibrar as escalas do BM25 e do cosseno.
+   listas. Usa so a posicao, entao nao precisa calibrar as escalas do BM25 e do cosseno;
+4. re-ranking dos candidatos com cross-encoder, que le pergunta e avaliacao juntas (D08);
+5. MMR para nao entregar ao LLM dez variacoes da mesma frase.
 
-As variantes da ablacao (so BM25, so vetorial, sem filtro) saem dos parametros de
-`retrieve`.
+As variantes da ablacao (so BM25, so vetorial, sem re-ranking, sem filtro) saem dos
+parametros de `retrieve`.
 """
 
 from __future__ import annotations
@@ -23,6 +25,7 @@ import pandas as pd
 from src.indexing.lexical import LexicalIndex
 from src.indexing.vetorial import VectorIndex, embed
 from src.retrieval.filtros import Filters, entry_counts, review_mask
+from src.retrieval.mmr import mmr
 
 DOCS = Path("data/processed/documentos.parquet")
 RRF_K = 60
@@ -47,15 +50,18 @@ class Hit:
     review_ids: list[str] = field(default_factory=list)
     rank_lexical: int | None = None
     rank_vector: int | None = None
+    score_rerank: float | None = None
 
 
 class Retriever:
-    def __init__(self, docs: pd.DataFrame, lexical: LexicalIndex, vector: VectorIndex):
+    def __init__(self, docs: pd.DataFrame, lexical: LexicalIndex, vector: VectorIndex,
+                 reranker=None):
         if lexical.doc_ids != vector.doc_ids:
             raise ValueError("indices lexical e vetorial com entradas em ordem diferente")
         self.docs = docs
         self.lexical = lexical
         self.vector = vector
+        self.reranker = reranker
         self.doc_ids = vector.doc_ids
         self.position = {d: i for i, d in enumerate(self.doc_ids)}
         rep = docs[docs["is_representative"]].set_index("doc_id")
@@ -64,8 +70,8 @@ class Retriever:
             "review_id"].agg(list)
 
     @classmethod
-    def load(cls) -> Retriever:
-        return cls(pd.read_parquet(DOCS), LexicalIndex.load(), VectorIndex.load())
+    def load(cls, reranker=None) -> Retriever:
+        return cls(pd.read_parquet(DOCS), LexicalIndex.load(), VectorIndex.load(), reranker)
 
     def allowed(self, filters: Filters | None) -> tuple[np.ndarray, pd.Series]:
         """Mascara de entradas e mascara de avaliacoes para um filtro."""
@@ -100,12 +106,24 @@ class Retriever:
                  "rank_vector": vec_pos.get(d)} for d, s in fused]
 
     def retrieve(self, question: str, filters: Filters | None = None, mode: str = "hybrid",
-                 k: int = 10, n_candidates: int = N_CANDIDATES,
+                 k: int = 10, n_candidates: int = N_CANDIDATES, rerank: bool = True,
+                 mmr_lambda: float | None = 0.7,
                  query_vector: np.ndarray | None = None) -> list[Hit]:
         counts, mask = self.allowed(filters)
         cands = self.candidates(question, filters, mode, n_candidates, query_vector, counts)
         if not cands:
             return []
+        if rerank and self.reranker is not None:
+            texts = [self.texts[self.position[c["doc_id"]]] for c in cands]
+            for c, s in zip(cands, self.reranker.score(question, texts), strict=True):
+                c["score_rerank"] = float(s)
+                c["score"] = float(s)
+            cands.sort(key=lambda c: -c["score"])
+        if mmr_lambda is not None and len(cands) > k:
+            idx = [self.position[c["doc_id"]] for c in cands]
+            rel = np.array([c["score"] for c in cands], dtype=float)
+            order = mmr(rel, self.vector.vectors[idx], k=k, lambda_=mmr_lambda)
+            cands = [cands[i] for i in order]
         passing = set(self.docs.loc[mask, "review_id"])
         hits = []
         for c in cands[:k]:
@@ -114,5 +132,6 @@ class Retriever:
             hits.append(Hit(doc_id=c["doc_id"], score=c["score"], text=self.texts[pos],
                             n_reviews=int(counts[pos]), review_ids=reviews,
                             rank_lexical=c.get("rank_lexical"),
-                            rank_vector=c.get("rank_vector")))
+                            rank_vector=c.get("rank_vector"),
+                            score_rerank=c.get("score_rerank")))
         return hits
