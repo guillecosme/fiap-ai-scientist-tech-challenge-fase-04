@@ -1,0 +1,81 @@
+id,pergunta,tipo,origem,filtros_esperados,alvo_objetivo,split
+q01,Quais são os principais motivos de insatisfação dos clientes?,respondivel,enunciado,"{""score_max"": 2}",,calibracao
+q02,Quais problemas aparecem com maior frequência nas avaliações?,respondivel,enunciado,,,calibracao
+q03,O que os consumidores mais valorizam em sua experiência de compra?,respondivel,enunciado,"{""score_min"": 4}",,calibracao
+q04,"Quais padrões aparecem nos relatos sobre entrega, qualidade dos produtos ou atendimento?",respondivel,enunciado,,,teste
+q05,Quais são os principais problemas relatados pelos clientes?,respondivel,enunciado,,,calibracao
+q06,Quais reclamações relacionadas à entrega aparecem com maior frequência?,respondivel,enunciado,,,calibracao
+q07,O que os clientes mais elogiam em suas experiências de compra?,respondivel,enunciado,"{""score_min"": 4}",,teste
+q08,Quais problemas são relatados por clientes insatisfeitos?,respondivel,enunciado,"{""score_max"": 2}",,teste
+q09,Existem padrões recorrentes nas avaliações relacionadas à qualidade dos produtos?,respondivel,enunciado,,,teste
+q10,O que os clientes relatam sobre problemas relacionados à entrega?,respondivel,enunciado,,,calibracao
+q11,Quais padrões podem ser identificados nas avaliações de clientes insatisfeitos?,respondivel,enunciado,"{""score_max"": 2}",,teste
+q12,Quais avaliações sustentam a conclusão de que existem problemas recorrentes relacionados ao prazo de entrega?,respondivel,enunciado,,atraso,calibracao
+q13,Quais são os principais problemas relatados nas avaliações com nota baixa?,respondivel,enunciado,"{""score_max"": 2}",,teste
+q14,"O que os clientes mais elogiam na categoria cama, mesa e banho?",respondivel,enunciado,"{""score_min"": 4, ""categories"": [""cama_mesa_banho""]}",,calibracao
+q15,Quais temas aparecem nas avaliações de entregas atrasadas?,respondivel,enunciado,"{""late"": true}",atraso,teste
+q16,O que os clientes dizem quando o pedido não chega?,respondivel,tema,"{""not_received"": true}",nao_recebeu,calibracao
+q17,Quais reclamações existem sobre atraso na entrega?,respondivel,tema,"{""late"": true}",atraso,teste
+q18,Há relatos de produto errado ou diferente do que foi comprado?,respondivel,tema,,,teste
+q19,O que os clientes relatam sobre produtos com defeito ou que não funcionam?,respondivel,tema,,,teste
+q20,Há reclamações de produtos que chegaram quebrados ou danificados?,respondivel,tema,,,teste
+q21,O que os clientes falam sobre a embalagem dos produtos?,respondivel,tema,,,calibracao
+q22,"Há relatos de pedidos que chegaram incompletos, faltando itens?",respondivel,tema,,,teste
+q23,Como os clientes avaliam o atendimento e a comunicação do vendedor?,respondivel,tema,,,calibracao
+q24,O que os clientes relatam sobre devolução e reembolso?,respondivel,tema,,,teste
+q25,Há reclamações relacionadas à nota fiscal?,respondivel,tema,,,teste
+q26,O que os clientes dizem sobre a qualidade do material dos produtos?,respondivel,tema,,,calibracao
+q27,Há reclamações sobre tamanho ou medidas diferentes do anunciado?,respondivel,tema,,,calibracao
+q28,Os clientes relatam produtos falsificados ou que não são originais?,respondivel,tema,,,calibracao
+q29,O que os clientes falam sobre os Correios?,respondivel,tema,,,teste
+q30,O que os clientes elogiam na rapidez da entrega?,respondivel,tema,"{""score_min"": 4}",,calibracao
+q31,Os clientes comentam que o produto estava de acordo com o anúncio?,respondivel,tema,,,calibracao
+q32,O que os clientes dizem sobre o preço e o custo-benefício?,respondivel,tema,,,calibracao
+q33,Há relatos sobre dificuldade de montagem ou instalação dos produtos?,respondivel,tema,,,calibracao
+q34,O que os clientes relatam sobre cancelamento de pedidos?,respondivel,tema,,,teste
+q35,Os clientes reclamam da falta de informação sobre o rastreamento do pedido?,respondivel,tema,,,teste
+q36,O que os clientes falam sobre receber o pedido em entregas separadas?,respondivel,tema,,,teste
+q37,Há elogios ao atendimento da loja?,respondivel,tema,"{""score_min"": 4}",,calibracao
+q38,O que os clientes relatam sobre produtos com cor diferente da escolhida?,respondivel,tema,,,calibracao
+q39,O que os clientes dizem sobre trocas de produtos?,respondivel,tema,,,teste
+q40,Os clientes mencionam que o prazo de entrega informado era muito longo?,respondivel,tema,,,calibracao
+q41,Quais reclamações aparecem nas avaliações de informática e acessórios?,respondivel,metadado,"{""categories"": [""informatica_acessorios""]}",,teste
+q42,O que os clientes elogiam nos produtos de beleza e saúde?,respondivel,metadado,"{""score_min"": 4, ""categories"": [""beleza_saude""]}",,teste
+q43,Quais problemas os clientes relatam nos móveis e artigos de decoração?,respondivel,metadado,"{""categories"": [""moveis_decoracao""]}",,calibracao
+q44,Do que reclamam os clientes da categoria telefonia?,respondivel,metadado,"{""categories"": [""telefonia""]}",,teste
+q45,O que os clientes elogiam em esporte e lazer?,respondivel,metadado,"{""score_min"": 4, ""categories"": [""esporte_lazer""]}",,teste
+q46,Quais problemas aparecem nas avaliações de relógios e presentes?,respondivel,metadado,"{""categories"": [""relogios_presentes""]}",,calibracao
+q47,Por que clientes com entrega no prazo deram nota baixa?,respondivel,metadado,"{""late"": false, ""score_max"": 2}",,teste
+q48,O que dizem os clientes que deram nota alta mesmo com o pedido atrasado?,respondivel,metadado,"{""late"": true, ""score_min"": 4}",atraso,calibracao
+q49,O que comentam os clientes que deram nota 3?,respondivel,metadado,"{""score_min"": 3, ""score_max"": 3}",,calibracao
+q50,Quais reclamações de entrega aparecem entre clientes da região Norte?,respondivel,metadado,"{""regions"": [""Norte""]}",,calibracao
+q51,O que os clientes do Nordeste relatam sobre a entrega?,respondivel,metadado,"{""regions"": [""Nordeste""]}",,calibracao
+q52,Quais problemas os clientes de São Paulo relatam?,respondivel,metadado,"{""states"": [""SP""]}",,calibracao
+q53,O que os clientes do Rio de Janeiro reclamam sobre a entrega?,respondivel,metadado,"{""states"": [""RJ""]}",,teste
+q54,Quais reclamações os clientes fizeram em novembro de 2017?,respondivel,metadado,"{""period_start"": ""2017-11"", ""period_end"": ""2017-11""}",,teste
+q55,O que os clientes elogiaram nas compras de 2018?,respondivel,metadado,"{""score_min"": 4, ""period_start"": ""2018-01"", ""period_end"": ""2018-12""}",,calibracao
+q56,O que relatam os clientes que responderam a pesquisa antes de receber o pedido?,respondivel,metadado,"{""not_received"": true}",nao_recebeu,teste
+q57,Quais problemas aparecem nas avaliações de utilidades domésticas?,respondivel,metadado,"{""categories"": [""utilidades_domesticas""]}",,calibracao
+q58,Do que os clientes reclamam na categoria brinquedos?,respondivel,metadado,"{""categories"": [""brinquedos""]}",,calibracao
+q59,"Quais problemas aparecem nos pedidos atrasados de cama, mesa e banho?",respondivel,metadado,"{""late"": true, ""categories"": [""cama_mesa_banho""]}",atraso,teste
+q60,O que os clientes elogiam nos produtos automotivos?,respondivel,metadado,"{""score_min"": 4, ""categories"": [""automotivo""]}",,teste
+u01,Qual foi o faturamento total da Olist em 2018?,fora_do_escopo,construida,,,calibracao
+u02,Quem é o atual CEO da Olist?,fora_do_escopo,construida,,,calibracao
+u03,Qual é a previsão do tempo para amanhã em São Paulo?,fora_do_escopo,construida,,,calibracao
+u04,Como fazer uma receita de bolo de cenoura?,fora_do_escopo,construida,,,teste
+u05,Qual é a taxa de conversão do site da loja?,fora_do_escopo,construida,,,teste
+u06,Qual seleção ganhou a Copa do Mundo de 2018?,fora_do_escopo,construida,,,teste
+u07,Quantos funcionários trabalham na Olist?,fora_do_escopo,construida,,,teste
+u08,Qual é a margem de lucro média dos vendedores?,fora_do_escopo,construida,,,calibracao
+u09,O que os clientes acham do pagamento via PIX?,sem_evidencia,construida,,,calibracao
+u10,Como os clientes avaliam a entrega feita por drones?,sem_evidencia,construida,,,teste
+u11,O que os clientes dizem sobre pagar com criptomoedas?,sem_evidencia,construida,,,teste
+u12,Quais reclamações os clientes fizeram sobre compras de 2020?,sem_evidencia,construida,"{""period_start"": ""2020-01"", ""period_end"": ""2020-12""}",,teste
+u13,Como os clientes de Portugal avaliam a entrega?,sem_evidencia,construida,,,teste
+u14,O que os clientes acham do atendimento por chatbot da loja?,sem_evidencia,construida,,,calibracao
+u15,O que os clientes dizem sobre o programa de cashback da loja?,sem_evidencia,construida,,,calibracao
+u16,O que os clientes acham dos óculos de realidade virtual vendidos na loja?,sem_evidencia,construida,,,calibracao
+u17,O que os clientes falam dos produtos da categoria seguros e serviços?,evidencia_insuficiente,construida,"{""categories"": [""seguros_e_servicos""]}",,teste
+u18,Como os clientes avaliam os produtos de PC gamer?,evidencia_insuficiente,construida,"{""categories"": [""pc_gamer""]}",,teste
+u19,O que os clientes acham das roupas infantojuvenis?,evidencia_insuficiente,construida,"{""categories"": [""fashion_roupa_infanto_juvenil""]}",,calibracao
+u20,O que os clientes acham dos produtos para piscina?,evidencia_insuficiente,construida,,,calibracao
