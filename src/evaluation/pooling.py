@@ -11,12 +11,16 @@ import os
 import time
 from concurrent.futures import ThreadPoolExecutor
 
+import numpy as np
 import pandas as pd
 
-from src.evaluation.julgamento import JUDGMENTS, POOL, POOL_DEPTH, judge, load_questions
+from src.evaluation.julgamento import AUDIT, JUDGMENTS, POOL, POOL_DEPTH, judge, load_questions
 from src.retrieval.filtros import rule_based_filters
 
 HYDE = POOL.parent / "hyde.parquet"
+SECOND_JUDGE = "gemma-4-26b-a4b-it"
+AUDIT_QUESTIONS = 30
+PAIRS_PER_QUESTION = 4
 
 # nome: (modo, re-ranking, filtro, HyDE)
 VARIANTS = {
@@ -133,3 +137,46 @@ def judge_pool(model_override: str | None = None, out=JUDGMENTS) -> pd.DataFrame
     result.to_parquet(out, index=False)
     print("julgamento:", llm.usage())
     return result
+
+
+def build_audit() -> pd.DataFrame:
+    """Amostra para auditoria: 30 perguntas respondiveis sorteadas e 4 pares de cada,
+    priorizando notas diferentes do juiz. O segundo juiz julga a amostra (uma chamada por
+    pergunta) e a coluna nota_manual fica vazia para o rotulo humano; a concordancia
+    com ela e calculada no notebook 05 quando estiver preenchida."""
+    from src.generation.provedor import LLM
+
+    questions = load_questions().set_index("id")
+    j = pd.read_parquet(JUDGMENTS)
+    j = j[j["question_id"].str.startswith("q")]
+    rng = np.random.default_rng(42)
+    chosen = rng.choice(sorted(j["question_id"].unique()), size=AUDIT_QUESTIONS, replace=False)
+    parts = []
+    for qid in sorted(chosen):
+        g = j[j["question_id"] == qid].sample(frac=1, random_state=42)
+        # um de cada nota primeiro, depois o que faltar
+        pick = g.drop_duplicates("nota")
+        pick = pd.concat([pick, g.drop(pick.index)]).head(PAIRS_PER_QUESTION)
+        parts.append(pick)
+    sample = pd.concat(parts, ignore_index=True)
+    docs = pd.read_parquet("data/processed/documentos.parquet")
+    texts = docs[docs["is_representative"]].set_index("doc_id")["text_clean"]
+    second = LLM("judge", model_override=SECOND_JUDGE)
+    second_grades = {}
+    for qid, g in sample.groupby("question_id"):
+        for d, n in zip(g["doc_id"], judge(second, questions.loc[qid, "pergunta"],
+                                           texts.loc[g["doc_id"]].tolist()), strict=True):
+            second_grades[(qid, d)] = n
+    audit = pd.DataFrame({
+        "question_id": sample["question_id"],
+        "pergunta": sample["question_id"].map(questions["pergunta"]),
+        "doc_id": sample["doc_id"],
+        "texto": sample["doc_id"].map(texts),
+        "nota_juiz": sample["nota"].astype(int),
+        "nota_segundo_juiz": [second_grades[(q, d)] for q, d in
+                              zip(sample["question_id"], sample["doc_id"], strict=True)],
+        "nota_manual": "",
+    })
+    audit.to_csv(AUDIT, index=False)
+    print("segundo juiz:", second.usage())
+    return audit

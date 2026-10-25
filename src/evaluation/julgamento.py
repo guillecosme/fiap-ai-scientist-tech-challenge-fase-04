@@ -3,6 +3,7 @@
 Uso:
     python -m src.evaluation.julgamento pool        # monta o pool de candidatos
     python -m src.evaluation.julgamento julgar      # julga o pool com o modelo juiz
+    python -m src.evaluation.julgamento auditoria   # amostra para auditoria e segundo juiz
 
 Pooling: para cada pergunta, os 10 primeiros de cada variante de busca (BM25, vetorial,
 hibrida, com re-ranking, com filtros e com HyDE) formam o pool. So o que esta no pool e
@@ -22,6 +23,7 @@ import argparse
 import json
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from pydantic import BaseModel, Field
 
@@ -31,6 +33,7 @@ EVAL_DIR = Path("data/eval")
 QUESTIONS = EVAL_DIR / "perguntas.csv"
 POOL = EVAL_DIR / "pool.parquet"
 JUDGMENTS = EVAL_DIR / "julgamentos.parquet"
+AUDIT = EVAL_DIR / "auditoria_manual.csv"
 POOL_DEPTH = 10
 BATCH = 40
 
@@ -113,13 +116,22 @@ def relevance_table(judgments: pd.DataFrame, docs: pd.DataFrame,
     return j
 
 
+def cohen_kappa(a: np.ndarray, b: np.ndarray) -> float:
+    a, b = np.asarray(a), np.asarray(b)
+    labels = np.union1d(a, b)
+    po = np.mean(a == b)
+    pe = sum(np.mean(a == lab) * np.mean(b == lab) for lab in labels)
+    return float((po - pe) / (1 - pe)) if pe < 1 else 1.0
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("etapa", choices=["pool", "julgar"])
+    parser.add_argument("etapa", choices=["pool", "julgar", "auditoria"])
     args = parser.parse_args()
     from src.evaluation import pooling
 
-    {"pool": pooling.build_pool, "julgar": pooling.judge_pool}[args.etapa]()
+    {"pool": pooling.build_pool, "julgar": pooling.judge_pool,
+     "auditoria": pooling.build_audit}[args.etapa]()
 
 
 if __name__ == "__main__":
