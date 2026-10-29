@@ -1,0 +1,7 @@
+nome,variante,recall@10,precision@10,mrr,latencia_mediana_ms
+BM25,bm25,0.199,0.3283,0.4904,130.0
+Vetorial,vetorial,0.24,0.385,0.5542,116.0
+Híbrida (RRF),hibrida,0.2301,0.3783,0.5614,145.0
+Híbrida + re-ranking,hibrida_rerank,0.3058,0.4717,0.6478,1042.0
++ filtros,hibrida_rerank_filtros,0.5003,0.6933,0.8596,1023.0
++ HyDE,hibrida_rerank_filtros_hyde,0.5093,0.6883,0.8147,1040.0
