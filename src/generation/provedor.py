@@ -4,6 +4,8 @@ Configuracao por variaveis de ambiente (ver .env.example):
 - GOOGLE_API_KEY: chave da API do Gemini;
 - GEMINI_CHAT_MODEL: modelo que gera respostas, extrai filtros e escreve o HyDE;
 - GEMINI_JUDGE_MODEL: modelo que julga relevancia e fidelidade (diferente do gerador);
+- GEMINI_FALLBACK_MODEL: modelo de reserva, usado quando o principal falha depois das
+  retentativas (opcional);
 - TC_LLM_INTERVALO: segundos minimos entre chamadas ao mesmo modelo (padrao 4).
 
 As variaveis vem do ambiente, do arquivo apontado por TC_ENV_FILE ou do .env na raiz do
@@ -67,6 +69,7 @@ class CallRecord:
 class LLM:
     role: str = "chat"
     model_override: str | None = None
+    fallback_model: str | None = None
     temperature: float = 0.0
     thinking_level: str | None = "low"
     timeout: float = 90.0
@@ -78,6 +81,8 @@ class LLM:
     def __post_init__(self) -> None:
         load_env()
         self.model = self.model_override or model_name(self.role)
+        if self.fallback_model is None:
+            self.fallback_model = os.environ.get("GEMINI_FALLBACK_MODEL") or None
         self._client = None
         self._last_call = 0.0
 
@@ -158,7 +163,19 @@ class LLM:
                 "input_tokens", 0), data["usage"].get("output_tokens", 0), key))
         else:
             t0 = time.perf_counter()
-            result, usage = self._call(msgs, schema)
+            try:
+                result, usage = self._call(msgs, schema)
+            except Exception:
+                if not self.fallback_model or self.fallback_model == self.model:
+                    raise
+                # o modelo de reserva tem cache e registro proprios
+                backup = LLM(self.role, model_override=self.fallback_model,
+                             fallback_model=self.fallback_model, temperature=self.temperature,
+                             thinking_level=self.thinking_level, timeout=self.timeout,
+                             cache_dir=self.cache_dir, interval=self.interval)
+                out = backup.invoke(prompt, schema=schema, system=system)
+                self.calls.extend(backup.calls)
+                return out
             latency = time.perf_counter() - t0
             data = {"model": self.model, "result": result, "latency_s": latency,
                     "usage": {k: usage.get(k, 0) for k in ("input_tokens", "output_tokens")}}
