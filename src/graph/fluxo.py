@@ -22,6 +22,7 @@ from langgraph.graph import END, START, StateGraph
 from src.generation.citacoes import verify
 from src.generation.esquemas import Analise, Resposta
 from src.generation.geracao import build_evidence, generate
+from src.indexing.temas import load_themes, theme_frequency
 from src.retrieval.filtros import Filters, review_mask, rule_based_filters
 
 ANALYSIS_SYSTEM = (
@@ -105,11 +106,13 @@ class Estado(TypedDict, total=False):
 class Pipeline:
     """Recursos do fluxo (indices, modelos, LLM) e os nos do grafo."""
 
-    def __init__(self, retriever, llm=None, gate: Gate | None = None, k: int = 10):
+    def __init__(self, retriever, llm=None, gate: Gate | None = None,
+                 themes: pd.DataFrame | None = None, k: int = 10):
         self.retriever = retriever
         self.docs = retriever.docs
         self.llm = llm
         self.gate = gate or Gate()
+        self.themes = themes if themes is not None else load_themes()
         self.k = k
         self.graph = self._build()
 
@@ -155,7 +158,16 @@ class Pipeline:
         hits = self.retriever.retrieve(consulta, filtros, k=self.k)
         mask = (review_mask(self.docs, filtros) if not filtros.is_empty()
                 else pd.Series(True, index=self.docs.index))
+        freq = []
+        if s["analise"].get("frequencia") and mask.any():
+            f = theme_frequency(self.docs, self.themes, mask)
+            side = self._side(filtros)
+            if side:
+                f = f[f["polaridade"] == side]
+                f["pct"] = (100 * f["avaliacoes"] / f["avaliacoes"].sum()).round(1)
+            freq = f.to_dict("records")
         return {"hits": [asdict(h) for h in hits], "total_recorte": int(mask.sum()),
+                "frequencia": freq,
                 "tempos": {**s["tempos"], "recuperar": time.perf_counter() - t0}}
 
     def avaliar_evidencia(self, s: Estado) -> Estado:
@@ -172,8 +184,9 @@ class Pipeline:
         t0 = time.perf_counter()
         hits = [Hit(**h) for h in s["hits"]]
         evidence = build_evidence(hits, self.docs)
+        freq = pd.DataFrame(s.get("frequencia") or [])
         try:
-            resposta = generate(self.llm, s["pergunta"], evidence, s["recorte"], None,
+            resposta = generate(self.llm, s["pergunta"], evidence, s["recorte"], freq,
                                 s["total_recorte"]).model_dump()
         except Exception as exc:  # noqa: BLE001
             # sem resposta do LLM, o gestor ainda recebe as evidencias encontradas
@@ -208,6 +221,14 @@ class Pipeline:
                              "limitacoes": texto}}
 
     # ------------------------------------------------------------------ grafo
+
+    @staticmethod
+    def _side(f: Filters) -> str | None:
+        if f.score_max is not None and f.score_max <= 3:
+            return "problema"
+        if f.score_min is not None and f.score_min >= 4:
+            return "elogio"
+        return None
 
     def _after_gate(self, s: Estado) -> str:
         if s["decisao"] == "responder" and self.llm is not None:
