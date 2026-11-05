@@ -47,3 +47,6 @@ tmp/
 
 # Temporarios do LibreOffice
 .~lock.*#
+
+# Rastro local das consultas feitas pela API (o rastro da avaliacao e versionado)
+reports/rastros/api.parquet
