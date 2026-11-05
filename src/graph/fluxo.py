@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import time
 import uuid
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 from typing import Any, TypedDict
 
 import pandas as pd
@@ -22,6 +22,7 @@ from langgraph.graph import END, START, StateGraph
 from src.generation.citacoes import verify
 from src.generation.esquemas import Analise, Resposta
 from src.generation.geracao import build_evidence, generate
+from src.graph.gate import Gate
 from src.indexing.temas import load_themes, theme_frequency
 from src.retrieval.filtros import Filters, review_mask, rule_based_filters
 
@@ -52,35 +53,6 @@ REFUSALS = {
                          "({recorte}), poucas para identificar um padrão.",
     "llm_insuficiente": "As evidências recuperadas não bastam para responder: {detalhe}",
 }
-
-
-@dataclass
-class Gate:
-    """Gate de evidencia: o fluxo so gera resposta quando a busca trouxe evidencia.
-
-    Limiar provisorio sobre o score do cross-encoder, ate a calibracao nas perguntas de
-    calibracao do conjunto de avaliacao.
-    """
-
-    threshold: float = -6.0
-    min_hits: int = 1
-    min_reviews: int = 3
-
-    def decide(self, hits: list[dict], total_recorte: int) -> dict:
-        scores = [h["score_rerank"] if h.get("score_rerank") is not None else h["score"]
-                  for h in hits]
-        top = max(scores) if scores else None
-        above = sum(sc >= self.threshold for sc in scores)
-        if total_recorte == 0 or not hits:
-            motivo = "sem_avaliacoes"
-        elif total_recorte < self.min_reviews:
-            motivo = "poucas_avaliacoes"
-        elif above < self.min_hits:
-            motivo = "evidencia_insuficiente"
-        else:
-            motivo = None
-        return {"passa": motivo is None, "motivo": motivo, "top_score": top,
-                "acima_do_limiar": int(above), "limiar": self.threshold}
 
 
 class Estado(TypedDict, total=False):
@@ -118,12 +90,12 @@ class Pipeline:
 
     @classmethod
     def load(cls, k: int = 10) -> Pipeline:
-        """Pipeline completo: indices, cross-encoder, LLM de geracao e gate."""
+        """Pipeline completo: indices, cross-encoder, LLM de geracao e gate calibrado."""
         from src.generation.provedor import LLM
         from src.retrieval.hibrida import Retriever
         from src.retrieval.reranking import CrossEncoderReranker
 
-        return cls(Retriever.load(CrossEncoderReranker()), LLM("chat"), gate=Gate(), k=k)
+        return cls(Retriever.load(CrossEncoderReranker()), LLM("chat"), gate=Gate.load(), k=k)
 
     # ------------------------------------------------------------------ nos
 
