@@ -7,7 +7,8 @@ import pandas as pd
 import pytest
 
 from src.generation.esquemas import Afirmacao, Analise, Resposta
-from src.graph.fluxo import Gate, Pipeline
+from src.graph.fluxo import Pipeline
+from src.graph.gate import Gate
 from src.graph.rastro import load_traces, save_traces, trace_row
 from src.indexing.lexical import LexicalIndex
 from src.indexing.vetorial import VectorIndex
@@ -77,6 +78,8 @@ def test_out_of_scope_is_refused_before_retrieval(pipeline_factory):
     s = p.run("Qual o faturamento da Olist?")
     assert s["decisao"] == "recusar" and s["motivo"] == "fora_do_escopo"
     assert "hits" not in s
+    # a recusa diz o que a base contem, em vez de so negar
+    assert "2016 e 2018" in s["resposta"]["resumo"]
 
 
 def test_answer_keeps_only_cited_claims(pipeline_factory):

@@ -41,14 +41,18 @@ ANALYSIS_SYSTEM = (
 PROBLEM_WORDS = r"\b(problema|reclama|insatisf|ruim|negativ|nota baixa|falha|defeito)"
 FREQUENCY_WORDS = r"\b(principa|frequen|mais comu|recorrent|padr|ranking|mais |quais )"
 
+BASE_SCOPE = ("A base reúne notas e comentários de clientes sobre pedidos da Olist feitos entre "
+              "2016 e 2018: entrega, produto, atendimento, loja e elogios.")
+
 REFUSALS = {
-    "fora_do_escopo": "A pergunta pede uma informação que as avaliações de clientes não "
-                      "contêm. A base reúne notas e comentários sobre pedidos da Olist de "
-                      "2016 a 2018; métricas internas, financeiras ou assuntos alheios à "
-                      "experiência de compra ficam fora dela.",
-    "sem_avaliacoes": "Nenhuma avaliação com comentário atende ao recorte pedido ({recorte}).",
-    "evidencia_insuficiente": "As avaliações encontradas não tratam do assunto perguntado "
-                              "com relevância suficiente para sustentar uma resposta.",
+    "fora_do_escopo": "Não é possível responder com as avaliações de clientes: a pergunta pede "
+                      "uma informação que elas não contêm (métricas internas, financeiras ou "
+                      "assuntos alheios à experiência de compra). " + BASE_SCOPE,
+    "sem_avaliacoes": "Nenhuma avaliação com comentário atende ao recorte pedido ({recorte}). "
+                      + BASE_SCOPE + " Tente ampliar o recorte.",
+    "evidencia_insuficiente": "As avaliações encontradas não tratam do assunto perguntado com "
+                              "relevância suficiente para sustentar uma resposta. Não há "
+                              "evidência nos comentários para afirmar algo sobre isso.",
     "poucas_avaliacoes": "Há só {n} avaliação(ões) com comentário no recorte pedido "
                          "({recorte}), poucas para identificar um padrão.",
     "llm_insuficiente": "As evidências recuperadas não bastam para responder: {detalhe}",
