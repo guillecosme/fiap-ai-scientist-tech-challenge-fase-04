@@ -23,6 +23,7 @@ class Call:
     input_tokens: int = 10
     output_tokens: int = 5
     cached: bool = False
+    latency_s: float = 0.5
 
 
 class FakeLLM:
@@ -90,6 +91,7 @@ def test_answer_keeps_only_cited_claims(pipeline_factory):
     assert s["verificacao"]["validade"] == 0.5
     assert s["evidencias"][0]["id"] == "E1"
     assert s["llm"]["chamadas"] == 2
+    assert s["tempos"]["analisar_llm"] == 0.5 and s["tempos"]["gerar_llm"] == 0.5
 
 
 def test_filter_without_reviews_refuses(pipeline_factory):

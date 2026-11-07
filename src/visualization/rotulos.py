@@ -108,7 +108,7 @@ COLUMN_LABELS = {
 
 def category_label(name: str | None) -> str:
     """Nome da categoria para leitura; categorias novas caem no formato generico."""
-    if name is None or name != name:
+    if not isinstance(name, str):
         return "Sem categoria"
     return CATEGORY_LABELS.get(name, name.replace("_", " ").capitalize())
 

@@ -114,6 +114,7 @@ class Pipeline:
                 raise RuntimeError("sem LLM configurado")
             a = self.llm.invoke(q, schema=Analise, system=ANALYSIS_SYSTEM)
             analise, fonte = a.model_dump(), "llm"
+            llm_time = {"analisar_llm": self.llm.calls[-1].latency_s}
         except Exception as exc:  # noqa: BLE001
             erros.append(f"analise: {type(exc).__name__}")
             low = q.lower()
@@ -121,11 +122,13 @@ class Pipeline:
                        "frequencia": bool(re.search(FREQUENCY_WORDS, low)),
                        "consulta": q, "filtros": rule_based_filters(q).model_dump()}
             fonte = "regras"
+            llm_time = {}
         filtros = Filters(**analise["filtros"])
         return {"analise": analise, "fonte_analise": fonte,
                 "filtros": filtros.model_dump(exclude_none=True),
                 "recorte": filtros.describe(), "erros": erros,
-                "tempos": {**s.get("tempos", {}), "analisar": time.perf_counter() - t0}}
+                "tempos": {**s.get("tempos", {}), "analisar": time.perf_counter() - t0,
+                           **llm_time}}
 
     def recuperar(self, s: Estado) -> Estado:
         t0 = time.perf_counter()
@@ -174,7 +177,8 @@ class Pipeline:
                     "erros": [*s.get("erros", []), f"gerar: {type(exc).__name__}"],
                     "tempos": {**s["tempos"], "gerar": time.perf_counter() - t0}}
         return {"evidencias": evidence, "resposta": resposta,
-                "tempos": {**s["tempos"], "gerar": time.perf_counter() - t0}}
+                "tempos": {**s["tempos"], "gerar": time.perf_counter() - t0,
+                           "gerar_llm": self.llm.calls[-1].latency_s}}
 
     def verificar(self, s: Estado) -> Estado:
         resposta = Resposta(**s["resposta"])
@@ -237,6 +241,7 @@ class Pipeline:
         if self.llm is not None:
             new = self.llm.calls[calls_before:]
             state["llm"] = {"chamadas": len(new),
+                            "latencia_llm_s": sum(c.latency_s for c in new),
                             "tokens_entrada": sum(c.input_tokens for c in new),
                             "tokens_saida": sum(c.output_tokens for c in new),
                             "em_cache": sum(c.cached for c in new)}
