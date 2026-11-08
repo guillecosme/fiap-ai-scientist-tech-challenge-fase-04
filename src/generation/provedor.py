@@ -159,8 +159,10 @@ class LLM:
         path = self.cache_dir / key[:2] / f"{key}.json"
         if path.exists():
             data = json.loads(path.read_text(encoding="utf-8"))
-            self.calls.append(CallRecord(self.model, True, 0.0, data["usage"].get(
-                "input_tokens", 0), data["usage"].get("output_tokens", 0), key))
+            # a latencia registrada e a da chamada original, para medir operacao com cache
+            self.calls.append(CallRecord(self.model, True, data.get("latency_s", 0.0),
+                                         data["usage"].get("input_tokens", 0),
+                                         data["usage"].get("output_tokens", 0), key))
         else:
             t0 = time.perf_counter()
             try:
@@ -190,4 +192,6 @@ class LLM:
         return {"chamadas": len(self.calls), "chamadas_novas": len(new),
                 "tokens_entrada": sum(c.input_tokens for c in self.calls),
                 "tokens_saida": sum(c.output_tokens for c in self.calls),
-                "latencia_media_s": (sum(c.latency_s for c in new) / len(new)) if new else 0.0}
+                "latencia_media_s": (sum(c.latency_s for c in new) / len(new)) if new else 0.0,
+                "latencia_media_original_s": (sum(c.latency_s for c in self.calls)
+                                              / len(self.calls)) if self.calls else 0.0}
