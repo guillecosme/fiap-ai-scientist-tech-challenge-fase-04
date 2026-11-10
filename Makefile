@@ -1,4 +1,4 @@
-.PHONY: help setup lint test requirements data base documentos index notebooks clean
+.PHONY: help setup lint test requirements data base documentos index notebooks api clean
 
 PY = uv run python
 
@@ -14,6 +14,9 @@ help:
 	@echo "  base          monta a base de avaliacoes com os metadados do pedido"
 	@echo "  documentos    limpa e normaliza os comentarios e gera os documentos do indice"
 	@echo "  index         constroi o indice lexical (BM25), o vetorial (FAISS) e o mapa de temas"
+	@echo ""
+	@echo "Uso:"
+	@echo "  api           sobe a API em http://127.0.0.1:8000 (documentacao em /docs)"
 	@echo ""
 	@echo "Notebooks:"
 	@echo "  notebooks     executa os notebooks de ponta a ponta, na ordem"
@@ -51,6 +54,9 @@ notebooks:
 	for nb in notebooks/0*.ipynb; do \
 		uv run jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=-1 $$nb || exit 1; \
 	done
+
+api:
+	uv run uvicorn src.api.main:app --host 127.0.0.1 --port 8000
 
 clean:
 	rm -rf .pytest_cache .ruff_cache
