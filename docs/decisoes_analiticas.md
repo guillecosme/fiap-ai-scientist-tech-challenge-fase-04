@@ -36,8 +36,27 @@ Registro das decisões do projeto, com o motivo, a evidência e o notebook ou m�
 | D26 | MMR com λ = 0,7 nos 10 textos que vão ao LLM | similaridade média entre os resultados de 0,53 para 0,49, com precision@10 3,5 pontos menor (parte por textos não julgados) | notebook 05 |
 | D19 | O recorte "não recebeu" inclui os clientes que responderam antes de receber o pedido | 4.770 clientes de pedidos que acabaram entregues responderam antes de receber, com nota média 1,80 e comentários como "ainda não recebi"; o grupo é quase três vezes maior que o de pedidos não entregues (1.661) | notebook 01 |
 
-## Geração
+## Geração e orquestração
 
 | # | Decisão | Motivo e evidência | Onde |
 |---|---|---|---|
+| D11 | Saída estruturada com citação por afirmação, verificada por código | torna a fundamentação conferível sem depender de leitura; validade das citações de 0,97, com 6 afirmações sem evidência retiradas antes de chegar ao gestor | notebook 06, `src/generation/citacoes.py` |
+| D12 | Gate de evidência com limiar calibrado (-0,37 no score do cross-encoder) e mínimo de 3 avaliações no recorte | o limiar sai das 35 perguntas de calibração; no teste, 10 de 10 não respondíveis recusadas e 27 de 29 respondíveis respondidas. Limitação: 7 das 60 respondíveis recusadas | notebook 06, `src/graph/gate.py` |
+| D13 | Evidência delimitada e declarada como dado, nunca instrução | uma avaliação sintética com uma ordem foi ignorada nas 3 perguntas testadas | `reports/robustez.md` |
+| D14 | Grafo LangGraph com arestas condicionais, em vez de agente ReAct | caminho auditável, no máximo 2 chamadas ao LLM por pergunta (1,07 em média nas recusas) e recusa decidida por código | notebook 06, `src/graph/fluxo.py` |
+| D15 | Rastro de cada consulta em Parquet | filtros, entradas e scores, decisão, resposta, tempo por etapa e tokens consultáveis depois da execução; base das métricas de operação | `reports/rastros/` |
+| D16 | Provedor configurável por variável de ambiente, com modelo de reserva e cache | troca de modelo sem tocar no pipeline; o cache por hash do prompt evita pagar duas vezes pela mesma chamada | `src/generation/provedor.py` |
 | D20 | Respostas de frequência informam o denominador (avaliações com comentário) | quem comenta é mais insatisfeito que a base: 77% de quem dá nota 1 escreve comentário, contra 36% de quem dá nota 5 (V de Cramér = 0,29). Uma proporção calculada sobre o texto não vale para todos os clientes | notebook 01 |
+
+## O que ficou fora por decisão
+
+| Técnica | Motivo |
+|---|---|
+| Chunking | os comentários cabem inteiros no modelo de embeddings (D01) |
+| Índice aproximado (HNSW, IVF) | a busca exata leva 12 ms nesta escala (D06) |
+| HyDE no pipeline final | sem ganho na ablação (D25) |
+| Fine-tuning de modelo | o RAG responde com a base sem treinar modelo; custo e prazo não se justificam |
+| Agente ReAct livre | não determinístico e sem ganho para busca numa base única (D14) |
+| Classificador supervisionado de sentimento (Naive Bayes, regressão logística) | a nota do cliente já é o rótulo de satisfação |
+| Multimodal | a base não tem imagens |
+| Interface gráfica | a API com documentação interativa atende à demonstração |

@@ -1,5 +1,23 @@
 # Metodologia
 
+O projeto segue a ordem dos notebooks: entender a base (01), o texto (02), representar e indexar (03), mapear temas (04), medir a recuperação (05), medir a geração e a recusa (06) e demonstrar (07). Cada decisão está em `docs/decisoes_analiticas.md` com a evidência que a sustenta.
+
+## Base de conhecimento
+
+1. **Grão.** A avaliação (`review_id`). Uma avaliação ligada a vários pedidos do mesmo cliente aparece uma vez, com os pedidos agregados; pedidos com várias avaliações mantêm todas.
+2. **Metadados.** Situação da entrega, dias de atraso contra a data estimada, resposta antes da entrega, categoria principal e lista de categorias, período da compra, UF e região, construídos em `src/data/base.py` e testados em `tests/test_base.py`.
+3. **Hipóteses com teste estatístico** (notebooks 01 e 02), com o tamanho do efeito como critério: quem comenta dá nota diferente (V de Cramér 0,29); atraso derruba a nota (correlação bisserial de postos 0,64); quem responde antes de receber reclama da entrega (0,76); comentários negativos são mais longos (0,51); vocabulário de entrega aparece em elogios; o mesmo problema é escrito de formas diferentes; os temas diferem entre categorias (V de Cramér 0,16).
+4. **Texto.** Três versões (original, limpo, normalizado), um documento por avaliação sem fragmentação, deduplicação de textos idênticos com contagem.
+5. **Índices.** BM25 sobre radicais RSLP com as negações mantidas; embeddings `paraphrase-multilingual-MiniLM-L12-v2` em FAISS `IndexFlatIP`; mapa de temas com BERTopic, um modelo por polaridade, comparado com LDA pela coerência c_v.
+
+## Recuperação
+
+Filtros por metadado antes da busca, BM25 e vetorial com 50 candidatos cada, fusão por Reciprocal Rank Fusion (k = 60), re-ranking por cross-encoder e MMR (λ = 0,7) nos 10 que vão ao LLM. Cada componente entrou ou saiu pela ablação do notebook 05; o HyDE saiu por não trazer ganho.
+
+## Geração e recusa
+
+A pergunta passa por uma análise com saída estruturada (escopo, frequência, consulta reescrita e filtros). Perguntas fora do escopo são recusadas antes da busca. Depois da busca, o gate recusa quando o recorte é vazio ou pequeno ou quando o maior score do cross-encoder fica abaixo do limiar calibrado. A geração recebe as evidências numeradas, delimitadas e marcadas como dado, e a tabela de frequência por tema contada em código; cada afirmação cita as evidências, e a citação é conferida por código.
+
 ## Avaliação
 
 A avaliação foi definida antes da construção do pipeline e não ganhou perguntas ou métricas ao longo das rodadas. O conjunto de perguntas é a única parte construída do projeto; todo o resto é dado real da Olist.
