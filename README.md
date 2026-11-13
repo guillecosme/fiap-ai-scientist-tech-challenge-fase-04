@@ -210,6 +210,27 @@ curl -X POST http://127.0.0.1:8000/perguntar -H "Content-Type: application/json"
 
 `docs/reprodutibilidade.md` descreve as versões, as sementes, o que é determinístico e o custo das chamadas ao LLM. As respostas do LLM ficam em cache local por hash do prompt, e o resultado de cada etapa que usa o LLM (julgamentos, rastro, fidelidade) fica versionado em `data/eval/` e `reports/`: os notebooks 05 e 06 rodam sem chave de API.
 
+## Limitações
+
+Cada limitação vem com o número que a mede:
+
+- **O gate recusa 7 das 60 perguntas respondíveis**, quase sempre perguntas amplas ("como os clientes avaliam o atendimento") ou definidas só por metadado ("problemas dos clientes de São Paulo"). Nelas o cross-encoder dá score baixo a todos os candidatos, mesmo aos relevantes.
+- **A fusão de BM25 e vetorial não trouxe ganho mensurável** sobre o vetorial sozinho, e o HyDE não trouxe ganho sobre a busca com filtros. Os ganhos medidos vêm do re-ranking e dos filtros.
+- **O juiz é um LLM.** A concordância com um segundo juiz de outra família é moderada (kappa de 0,43), concentrada entre "parcial" e "relevante". A auditoria humana da amostra (`data/eval/auditoria_manual.csv`, coluna `nota_manual`) está preparada e ainda não foi preenchida. A relevância da resposta saturou (2 em todas as respostas) e não discrimina.
+- **4% das afirmações são generalizações** que as evidências não sustentam ("insatisfação generalizada").
+- **Quem comenta é mais insatisfeito que a base** (77% de quem dá nota 1 escreve, contra 36% de quem dá nota 5): as frequências valem para as avaliações comentadas, e as respostas dizem sobre qual conjunto foram calculadas.
+- **O mapa de temas é aproximado.** A coerência do BERTopic é maior que a do LDA, mas sem significância estatística, e a correspondência de tópicos para temas é uma leitura do analista.
+- **O conjunto de avaliação tem 80 perguntas**, construídas para o projeto; os intervalos de confiança são largos. As regras de filtro foram ajustadas lendo essas perguntas; por isso o extrator avaliado é o do LLM.
+- **A base é de 2016 a 2018 e foi anonimizada pela Olist**: nomes de lojas aparecem como casas de Game of Thrones.
+
+## Evoluções
+
+- limiar do gate próprio para perguntas definidas por metadado, em que a evidência vem do recorte e não do assunto do texto;
+- preencher a auditoria humana e, se a concordância com o juiz for baixa, recalibrar a rubrica;
+- índice aproximado (HNSW) e cross-encoder em GPU se a base crescer para milhões de avaliações;
+- atualização incremental dos índices e do mapa de temas com avaliações novas;
+- monitoramento a partir do rastro: perguntas recusadas, tempo por etapa e custo por consulta.
+
 ## Estrutura do repositório
 
 ```
