@@ -62,3 +62,7 @@ O estado do grafo (`Estado`) carrega a pergunta, a análise, os filtros, o recor
 | POST | `/perguntar` | `{"pergunta": "..."}` (3 a 500 caracteres) | `decisao`, `motivo`, `resumo`, `afirmacoes` (texto e ids das evidências), `limitacoes`, `recorte`, `avaliacoes_no_recorte`, `frequencia_por_tema`, `evidencias` (só as citadas: texto, nota, data, categoria, entrega, avaliações com o mesmo texto, `review_ids`), `tempos_s`, `chamadas_llm` |
 
 O pipeline é carregado na subida, com uma busca de aquecimento. Cada consulta grava uma linha em `reports/rastros/api.parquet`, fora do Git.
+
+## Interface
+
+`make app` abre a interface Streamlit (`app.py`) em `http://localhost:8501`. Ela carrega o mesmo `Pipeline` da API uma vez (`st.cache_resource`), com a busca de aquecimento, e tem três abas: perguntar (resposta, recorte, frequência por tema, afirmações, evidências citadas e rastro da consulta), qualidade medida (métricas lidas de `reports/` e `data/eval/`) e auditoria do juiz (rotulação dos pares de `data/eval/auditoria_manual.csv`, com a concordância calculada na hora). A lógica de apresentação fica em `src/app/servicos.py` e é testada em `tests/test_app.py`, inclusive com a tela executada pelo `AppTest` do Streamlit sobre um pipeline falso.
