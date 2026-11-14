@@ -162,25 +162,24 @@ A solução tem duas partes. A preparação roda uma vez e grava artefatos versi
 ```mermaid
 flowchart LR
   subgraph PREP["Preparação: roda uma vez"]
-    K["Kaggle: 9 CSVs da Olist"] -->|"make data<br/>SHA-256 no manifesto"| RAW["data/raw/olist"]
-    RAW -->|"make base"| BASE["avaliacoes.parquet<br/>98.410 avaliações, 37 colunas"]
-    BASE -->|"make documentos"| DOCS["documentos.parquet<br/>42.093 avaliações com texto<br/>34.889 textos distintos"]
-    DOCS -->|"make index"| BM["BM25 sobre radicais RSLP"]
-    DOCS -->|"make index"| VEC["embeddings de 384 dimensões<br/>FAISS IndexFlatIP"]
-    VEC -->|"make index"| TEM["mapa de temas<br/>BERTopic por polaridade"]
+    direction TB
+    K["Kaggle: 9 CSVs da Olist"] -->|"make data, SHA-256"| RAW["data/raw/olist"]
+    RAW -->|"make base"| BASE["avaliacoes.parquet<br/>98.410 avaliações"]
+    BASE -->|"make documentos"| DOCS["documentos.parquet<br/>42.093 avaliações<br/>34.889 textos distintos"]
+    DOCS -->|"make index"| BM["BM25 sobre<br/>radicais RSLP"]
+    DOCS -->|"make index"| VEC["embeddings 384 dim<br/>FAISS IndexFlatIP"]
+    VEC --> TEM["mapa de temas<br/>BERTopic por polaridade"]
   end
   subgraph CONS["Consulta: a cada pergunta"]
+    direction TB
     Q["pergunta do gestor"] --> AN["analisar<br/>LLM com saída Pydantic"]
-    AN --> RE["recuperar<br/>filtros, BM25 e vetorial, RRF,<br/>cross-encoder, MMR"]
+    AN --> RE["recuperar<br/>filtros, BM25 e vetorial,<br/>RRF, cross-encoder, MMR"]
     RE --> GA["gate de evidência"]
-    GA --> GE["gerar<br/>LLM com citação por afirmação"]
+    GA --> GE["gerar<br/>citação por afirmação"]
     GE --> VE["verificar citações"]
-    VE --> OUT["resposta, evidências com review_id<br/>e rastro em Parquet"]
+    VE --> OUT["resposta e evidências<br/>com review_id; rastro"]
   end
-  BASE --> RE
-  BM --> RE
-  VEC --> RE
-  TEM --> RE
+  PREP -->|"base, índices e temas"| CONS
 ```
 
 | Etapa | Módulo | Entrada | Saída |
