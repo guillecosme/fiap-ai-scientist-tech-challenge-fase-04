@@ -5,8 +5,13 @@ Tech Challenge da Fase 4 do MBA em AI Scientist (FIAP / POSTECH). O projeto cons
 Aluno: Guilherme Cosme (RM 372204).
 
 - Apresentação executiva: [reports/slides/RM372204 - Guilherme Cosme - Tech Challenge Fase 04.pdf](<reports/slides/RM372204 - Guilherme Cosme - Tech Challenge Fase 04.pdf>)
-- Pacote da entrega (apresentação em pdf e pptx mais os links): [reports/slides/RM372204 - Guilherme Cosme - Tech Challenge Fase 04.zip](<reports/slides/RM372204 - Guilherme Cosme - Tech Challenge Fase 04.zip>)
+- Pacote da entrega (apresentação em pdf e pptx, links e comprovantes): [reports/slides/RM372204 - Guilherme Cosme - Tech Challenge Fase 04.zip](<reports/slides/RM372204 - Guilherme Cosme - Tech Challenge Fase 04.zip>)
 - Vídeo de apresentação (até 7 min): [LINK_DO_VIDEO](LINK_DO_VIDEO) (também em [reports/slides/links_video_e_github.txt](reports/slides/links_video_e_github.txt))
+- Trilha Generative AI Engineering Pathway da Databricks Academy concluída (página My enrollments com os sete cursos e o learning plan como Completed, com nome e conta): [reports/comprovantes/databricks_generative_ai_engineering_pathway.png](reports/comprovantes/databricks_generative_ai_engineering_pathway.png)
+- Certificações AWS em IA e Machine Learning (validação em [aws.amazon.com/verification](https://aws.amazon.com/verification) pelo número de cada certificado):
+  - AWS Certified Machine Learning Engineer - Associate, número e26e1a06857a43bd9eff5b7dc9f12e34: [reports/comprovantes/aws_certified_machine_learning_engineer_associate.pdf](reports/comprovantes/aws_certified_machine_learning_engineer_associate.pdf)
+  - AWS Certified AI Practitioner, número 311cdbbab92343c4963e719d9e60689e: [reports/comprovantes/aws_certified_ai_practitioner.pdf](reports/comprovantes/aws_certified_ai_practitioner.pdf)
+  - AWS Certified AI Business Strategist, número ce2cb9f96b1d44638963076f226e015f: [reports/comprovantes/aws_certified_ai_business_strategist.pdf](reports/comprovantes/aws_certified_ai_business_strategist.pdf)
 - Métricas consolidadas: [reports/metricas.md](reports/metricas.md)
 - Exemplos de perguntas e respostas, com as evidências e os `review_id`: [reports/exemplos_perguntas_respostas.md](reports/exemplos_perguntas_respostas.md)
 - Testes de robustez: [reports/robustez.md](reports/robustez.md)
@@ -829,6 +834,7 @@ Cada limitação vem com o número que a mede:
 │   ├── exemplos_perguntas_respostas.md
 │   ├── robustez.md
 │   ├── rastros/              rastro das 80 perguntas da avaliação
+│   ├── comprovantes/         trilha da Databricks Academy e certificações AWS
 │   └── slides/               apresentação em pptx e pdf, links e pacote da entrega
 ├── images/                   figuras dos notebooks
 └── docs/                     arquitetura, metodologia, decisões, dicionário de dados, fontes e reprodutibilidade
@@ -884,3 +890,4 @@ O trabalho foi organizado em branches por etapa, com pull requests para a `main`
 - [reports/metricas.md](reports/metricas.md): métricas consolidadas de recuperação, geração, recusa e operação
 - [reports/exemplos_perguntas_respostas.md](reports/exemplos_perguntas_respostas.md): respostas completas com evidências e `review_id`
 - [reports/robustez.md](reports/robustez.md): instrução plantada e perguntas adversariais
+- [reports/comprovantes/](reports/comprovantes/): comprovação da trilha Generative AI Engineering Pathway da Databricks Academy e certificados AWS
