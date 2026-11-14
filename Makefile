@@ -64,6 +64,7 @@ avaliacao:
 	$(PY) -m src.evaluation.geracao injecao
 
 notebooks:
+	export HF_HUB_VERBOSITY=error TQDM_DISABLE=1; \
 	for nb in notebooks/0*.ipynb; do \
 		uv run jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=-1 $$nb || exit 1; \
 	done

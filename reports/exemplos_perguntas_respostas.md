@@ -79,7 +79,7 @@ Gerado pelo notebook 07 com o pipeline final (análise, recuperação híbrida c
 | E10 | ATRASO ENORME NA ENTREGA. A entrega está muuuuito atrasada e não recebi nenhum retorno a respeito. | 1 | 2018-07-27 | Utilidades domésticas | Entregue com atraso | 1 |
 
 *review_id das evidências:* E1: 05481f963c19afbeeb6c2d48fb31f3fe; E2: b7c9e20cf48170ef505e502cae85a46d; E3: 9183ee1d6da9be1da5e0776fc4b023d6; E4: 5cb48a77d5334f597153e0de0648bb6e; E5: de954d5e671955bf0500f4328055b876; E6: 93623428a858a3a0cf8679c420c4a8d3; E7: ac6bdc8a49173f8db773a6a97fc6d087; E8: c40ac9052280bd0ef25f33876f68797d; E9: 22162f5d35b60c13b619f8ed0458adfd; E10: f67c215f6e2b0e5d7d4cfdd598e823ae
-*Tempo:* 1.4 s nesta execução · chamadas ao LLM: 2
+*Tempo:* 1.6 s nesta execução · chamadas ao LLM: 2
 
 ---
 
@@ -119,7 +119,7 @@ Gerado pelo notebook 07 com o pipeline final (análise, recuperação híbrida c
 | E10 | super recomendo. excelente produto, entrega rápida. recomendo. | 5 | 2018-07-14 | Casa e construção | Entregue no prazo | 1 |
 
 *review_id das evidências:* E1: b0f9a68177c8390ca39707a56e998772; E2: 752d6729f1d725fffda68151f3756b6b; E3: 78c58d4a6cc2e756b43e6ea1ff6c6229; E4: cea5891cf0a15fbe6c837f350f697259; E5: 31bdc52857f8f7dcfd20484ee64c6e97; E6: a26ba95a5def3814a0389cbd23e2fb5a; E7: 08b8ab4cd13b5ce55a4f6558ba1d1c87; E8: 51359b855458a464aaf21671ff41fd0f; E9: 7046fbb96a01a1a4352ed2dac74f52cf; E10: 8aa5905667b126c8cd113a1ab88ecf74
-*Tempo:* 1.0 s nesta execução · chamadas ao LLM: 2
+*Tempo:* 1.1 s nesta execução · chamadas ao LLM: 2
 
 ---
 
@@ -160,7 +160,7 @@ Gerado pelo notebook 07 com o pipeline final (análise, recuperação híbrida c
 | E10 | Atraso. Ainda não recebi o produto. | 1 | 2018-06-03 | Beleza e saúde | Entregue com atraso | 1 |
 
 *review_id das evidências:* E1: 9dd82c651799bbaeabfd11deed989cd4; E2: 0f80e3076617983291eb9fd9c1dc3498; E3: 2e1d71fce98b42bf6cbdd5e06798c286; E4: 5cebd0cb812691be648e2be73527bfce; E5: 6298846cdf0eceb7ba5661c3810725b7; E6: 4a7118b1f9c3d06869e0cd9d5c1b4ccb; E7: ac313070ee4ecde0406fec694d8bc9cb; E8: 2f71ad6404923ebd6cc31b8654196ef6; E9: 5b14c151dac1c3e27a55c5c512a684b0; E10: 4cc9dc519327a019f0193e75e34c851d
-*Tempo:* 1.8 s nesta execução · chamadas ao LLM: 2
+*Tempo:* 2.1 s nesta execução · chamadas ao LLM: 2
 
 ---
 
@@ -200,7 +200,7 @@ Gerado pelo notebook 07 com o pipeline final (análise, recuperação híbrida c
 | E10 | Produto errado,cor e tamanho errado, péssima qualidade. | 1 | 2017-12-01 | Cama, mesa e banho | Entregue no prazo | 1 |
 
 *review_id das evidências:* E1: 7c2bfdc27c016b8ce15f3b1e37d830a2; E2: 0c6521a87c0f07246bbc4875a96c3da1; E3: c8bb07efb7fa82eba86e029c80be5d9a; E4: 0be07054d23f0f335ee4d15f4ee9886f; E5: fb9d26ae601018d2c1253e9af35b14e7; E6: 13dcde46c1a250aaed407dd6d5a53b77; E7: 3260e0b3b6cf9b9e8956ff89cc08a189; E8: 4221f3f3b5ffcf57d8eb3497d3332479; E9: c234fb41ba6510ff090beeb2462c0499; E10: 2f2a5e457479ae6caa49462daad14e5d
-*Tempo:* 1.3 s nesta execução · chamadas ao LLM: 2
+*Tempo:* 1.4 s nesta execução · chamadas ao LLM: 2
 
 ---
 
@@ -231,7 +231,7 @@ Gerado pelo notebook 07 com o pipeline final (análise, recuperação híbrida c
 | E10 | demora na entrega, ainda não recebi o produto | 2 | 2018-04-14 | Telefonia | Não entregue | 1 |
 
 *review_id das evidências:* E1: b5e71e87bfbbcd2a826b9610bac99680; E2: 98eaf3a20ac997b34bf433ac0979f4e2; E3: 05481f963c19afbeeb6c2d48fb31f3fe; E4: 1f3f5e3000ed6307fbda490057bfa59b; E5: 1bfec3e913196c72c1ea06fc8816bd9c; E6: 9d6c1f490b2b4bfef33820b5679e2d82; E7: e99c29f0a950abd77239b15adaaa38b8; E8: c99bd47a251c0fef5b5933b293acea03; E9: 0162340d190549d567ee0fdfb8fb725b; E10: d5ec0edbe1505d4f8c80f52d9c19f98d
-*Tempo:* 1.4 s nesta execução · chamadas ao LLM: 2
+*Tempo:* 1.9 s nesta execução · chamadas ao LLM: 2
 
 ---
 
@@ -271,7 +271,7 @@ Gerado pelo notebook 07 com o pipeline final (análise, recuperação híbrida c
 | E10 | Não é a primeira vez de atraso na entrega, quando consegue falar a atendente ainda pede um prazo de dois dias, fora o atraso, infelizmente as mudanças de entrega dos parceiros não está sendo pratica | 1 | 2018-03-09 | Utilidades domésticas | Entregue com atraso | 1 |
 
 *review_id das evidências:* E1: 10467dc456e818c60bd750271b5d183e; E2: 60025b90e14804969d69eb764eb682a0; E3: 0cf3369f069c5f82123fe37c668d39b9; E4: 1da9941264ebc5c4a093ee4ba82af918; E5: cc7aa30132ae7195c15ac60a6d96f63d; E6: ba5c756c2d4d0d636ac63de5cedb771d; E7: a1e9b5056896b01638a5aa8e02673955; E8: 6964442cd4b5a5a0c5bbfa8d6fb914ef; E9: dd6e0f7168d75cd78769333f7630a036; E10: 6a24fdb69a1596a14f8ebe8386855576
-*Tempo:* 1.3 s nesta execução · chamadas ao LLM: 2
+*Tempo:* 1.4 s nesta execução · chamadas ao LLM: 2
 
 ---
 
@@ -391,7 +391,7 @@ Gerado pelo notebook 07 com o pipeline final (análise, recuperação híbrida c
 | E10 | Demorou de mais pra chegar, se tivesse comprado fora do país não demoraria tanto. | 2 | 2018-01-20 | Cool stuff | Entregue com atraso | 1 |
 
 *review_id das evidências:* E1: 1bfec3e913196c72c1ea06fc8816bd9c; E2: a1e9b5056896b01638a5aa8e02673955; E3: 2c74e9b846eeb175c36f4e5fd9f92eb3; E4: 1faf54dfeb5d82e5218a8ca9433e90b8; E5: 85a391b84d8e864de7190a2afb6f82e4; E6: 10467dc456e818c60bd750271b5d183e; E7: ad643ac0f211566061c0f5a39d403a51; E8: 6964442cd4b5a5a0c5bbfa8d6fb914ef; E9: b72948c0912824f5660a661fcb3ef512; E10: 80457ae14ae95b6b2cca6ce4bffb123a
-*Tempo:* 1.3 s nesta execução · chamadas ao LLM: 2
+*Tempo:* 1.7 s nesta execução · chamadas ao LLM: 2
 
 ---
 
@@ -417,7 +417,7 @@ Gerado pelo notebook 07 com o pipeline final (análise, recuperação híbrida c
 
 
 
-*Tempo:* 1.6 s nesta execução · chamadas ao LLM: 1
+*Tempo:* 1.8 s nesta execução · chamadas ao LLM: 1
 
 ---
 
