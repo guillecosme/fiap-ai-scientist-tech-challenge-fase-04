@@ -60,3 +60,41 @@ Base de avaliações gerada por `make base` (`src/data/base.py`). Uma linha por 
 | `answered_before_delivery` | booleano | o cliente respondeu antes de receber o pedido, ou o pedido nunca foi entregue |
 | `purchase_year` | inteiro | ano da compra |
 | `purchase_month` | texto | mês da compra no formato `AAAA-MM` |
+
+## `data/processed/documentos.parquet`
+
+Documentos do índice, gerados por `make documentos` (`src/preprocessing/documentos.py`). Uma linha por avaliação com título ou comentário que tenha pelo menos uma palavra útil depois da limpeza: 42.093 linhas.
+
+| Coluna | Tipo | Descrição |
+|---|---|---|
+| `review_id` | texto | avaliação |
+| `review_comment_title`, `review_comment_message` | texto | título e comentário originais, usados para exibir a evidência |
+| `text_clean` | texto | título e comentário juntos, com quebras de linha, emojis e pontuação repetida tratados; entra nos embeddings e no contexto do LLM |
+| `text_norm` | texto | minúsculas, sem acento, só letras e dígitos; chave da deduplicação |
+| `tokens` | lista de texto | radicais RSLP sem stopwords, com as negações mantidas; entrada do BM25 |
+| `n_chars`, `n_words` | inteiro | tamanho do texto limpo |
+| `doc_id` | texto | identificador do texto normalizado (12 caracteres do SHA-1); avaliações com o mesmo texto compartilham o `doc_id` |
+| `doc_size` | inteiro | avaliações com o mesmo `doc_id` |
+| `is_representative` | booleano | avaliação mais antiga do grupo; o texto dela vai para o índice |
+| demais colunas | | metadados copiados da base de avaliações para os filtros: nota, datas, pedidos, período, situação da entrega, atraso, resposta antes da entrega, categorias, UF e região |
+
+## `data/index/`
+
+| Arquivo | Conteúdo |
+|---|---|
+| `bm25.parquet`, `bm25.json` | radicais de cada texto distinto, na ordem do índice, e os parâmetros k1 e b; o BM25 é reconstruído na carga |
+| `embeddings.npz`, `embeddings.json` | 34.889 vetores de 384 dimensões em float16 e os `doc_id` na mesma ordem; modelo e normalização no JSON |
+| `temas.parquet` | polaridade, tópico do BERTopic e tema nomeado de cada texto distinto |
+
+## `data/eval/`
+
+| Arquivo | Conteúdo |
+|---|---|
+| `perguntas.csv` | 80 perguntas com tipo, origem, recorte esperado, grupo de metadado e split |
+| `hyde.parquet` | avaliação hipotética gerada para cada pergunta (variante HyDE) |
+| `pool.parquet` | os 10 primeiros de cada variante de busca por pergunta |
+| `julgamentos.parquet`, `julgamentos_pipeline.parquet` | nota do juiz (0 a 2) para cada par pergunta e texto do pool e do pipeline final |
+| `auditoria_manual.csv` | amostra de 120 pares com a nota do juiz, a do segundo juiz e a coluna para a anotação humana |
+| `gate_sinais.parquet`, `limiar_evidencia.json` | análise e maior score de cada pergunta; limiar calibrado |
+| `fidelidade.parquet`, `fidelidade_sem_tabela.parquet` | julgamento de cada afirmação das respostas, com e sem a tabela de frequência no contexto do juiz |
+| `teste_injecao.parquet` | resultado do teste de instrução dentro da evidência |

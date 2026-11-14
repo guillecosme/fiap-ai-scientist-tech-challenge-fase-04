@@ -147,7 +147,7 @@ O re-ranking e os filtros têm ganhos significativos. A fusão empata com o veto
 Trechos do notebook 07; as respostas completas, com a tabela de evidências e os `review_id`, estão em `reports/exemplos_perguntas_respostas.md`.
 
 **Quais são os principais problemas relatados pelos clientes?**
-Recorte: nota de 1 a 3, 14.431 avaliações com texto. Pedido não recebido: 40% (5.551); defeito, produto errado ou má qualidade: 18%; pedido incompleto: 14%. As afirmações citam evidências como "Mandou o produto errado e até hoje não entrou em contato" (nota 1, Esporte e lazer).
+Recorte: nota de 1 a 3, 14.431 avaliações com texto. Pedido não recebido: 40% (5.551); defeito, produto errado ou má qualidade: 18%; pedido incompleto: 14%. As afirmações citam evidências como "Mandou o produto errado e ate hoje não entrou em contado para tentar solucionar o problema" (nota 1, Esporte e lazer), reproduzida com a grafia do cliente.
 
 **Quais temas aparecem nas avaliações de entregas atrasadas?**
 Recorte: entregues com atraso, 3.814 avaliações. 52% falam de não ter recebido o pedido: o cliente escreveu antes de a entrega acontecer.
