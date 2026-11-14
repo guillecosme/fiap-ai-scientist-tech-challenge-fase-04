@@ -1,0 +1,17 @@
+Tech Challenge Fase 4 - Voice of Customer Intelligence com RAG
+Guilherme Cosme Malagolini Silveira - RM 372204 - Turma 1IAST - MBA AI Scientist FIAP / POSTECH
+
+Video de apresentacao:
+https://www.loom.com/share/564de0c12f7a4898966744875e9fc080
+
+Repositorio no GitHub:
+https://github.com/guillecosme/fiap-ai-scientist-tech-challenge-fase-04
+
+Apresentacao: RM372204 - Guilherme Cosme - Tech Challenge Fase 04.pdf (e .pptx)
+
+Comprovantes (pasta comprovantes/ do pacote e reports/comprovantes/ no repositorio):
+- databricks_generative_ai_engineering_pathway.png: trilha Generative AI Engineering Pathway da Databricks Academy concluida
+- aws_certified_machine_learning_engineer_associate.pdf: AWS Certified Machine Learning Engineer - Associate (e26e1a06857a43bd9eff5b7dc9f12e34)
+- aws_certified_ai_practitioner.pdf: AWS Certified AI Practitioner (311cdbbab92343c4963e719d9e60689e)
+- aws_certified_ai_business_strategist.pdf: AWS Certified AI Business Strategist (ce2cb9f96b1d44638963076f226e015f)
+Validacao dos certificados AWS: https://aws.amazon.com/verification
