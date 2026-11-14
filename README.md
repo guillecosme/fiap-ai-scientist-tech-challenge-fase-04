@@ -2,7 +2,7 @@
 
 Tech Challenge da Fase 4 do MBA em AI Scientist (FIAP / POSTECH). O projeto constrói uma solução de Voice of Customer baseada em RAG (Retrieval-Augmented Generation) sobre as 98.410 avaliações de clientes da Olist, com pedidos de 2016 a 2018. Gestores de e-commerce fazem perguntas em linguagem natural e recebem respostas fundamentadas nos comentários recuperados da base: cada afirmação cita as avaliações que a sustentam, cada evidência traz o `review_id` da avaliação original, a frequência dos temas é contada em código sobre todo o recorte pedido e o sistema recusa de forma explícita quando a base não traz evidência suficiente. A recuperação combina filtros por metadado, busca lexical (BM25), busca vetorial, re-ranking com cross-encoder e MMR; a orquestração é um grafo LangGraph com no máximo duas chamadas ao LLM por pergunta. Tudo é medido num conjunto de 80 perguntas definido antes da construção do pipeline.
 
-Aluno: Guilherme Cosme (RM 372204).
+Aluno: Guilherme Cosme Malagolini Silveira (RM 372204).
 
 - Apresentação executiva: [reports/slides/RM372204 - Guilherme Cosme - Tech Challenge Fase 04.pdf](<reports/slides/RM372204 - Guilherme Cosme - Tech Challenge Fase 04.pdf>)
 - Pacote da entrega (apresentação em pdf e pptx, links e comprovantes): [reports/slides/RM372204 - Guilherme Cosme - Tech Challenge Fase 04.zip](<reports/slides/RM372204 - Guilherme Cosme - Tech Challenge Fase 04.zip>)
