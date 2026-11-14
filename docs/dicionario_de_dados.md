@@ -97,4 +97,5 @@ Documentos do índice, gerados por `make documentos` (`src/preprocessing/documen
 | `auditoria_manual.csv` | amostra de 120 pares com a nota do juiz, a do segundo juiz e a coluna para a anotação humana |
 | `gate_sinais.parquet`, `limiar_evidencia.json` | análise e maior score de cada pergunta; limiar calibrado |
 | `fidelidade.parquet`, `fidelidade_sem_tabela.parquet` | julgamento de cada afirmação das respostas, com e sem a tabela de frequência no contexto do juiz |
-| `teste_injecao.parquet` | resultado do teste de instrução dentro da evidência |
+| `teste_injecao.parquet` | resposta de cada pergunta respondida com uma evidência sintética que traz uma instrução, nas duas variantes, e se a resposta citou ou seguiu a instrução |
+| `perguntas_adversariais.parquet` | decisão e resposta do fluxo completo para seis perguntas que tentam tirar o sistema das regras |
