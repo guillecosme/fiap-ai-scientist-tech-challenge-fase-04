@@ -29,7 +29,7 @@ O que a base mostra ao gestor: entre as avaliações com texto e nota até 3, **
 | Arquitetura | [Arquitetura](#arquitetura) e `docs/arquitetura.md` |
 | Tecnologias e bibliotecas | [Tecnologias](#tecnologias) |
 | Justificativa das decisões técnicas | [Decisões técnicas](#decisões-técnicas) e `docs/decisoes_analiticas.md` |
-| Exemplos de perguntas e respostas | [Exemplos](#exemplos-de-perguntas-e-respostas) e `reports/exemplos_perguntas_respostas.md` |
+| Exemplos de perguntas e respostas | [Exemplos](#exemplos-de-perguntas-e-respostas), `reports/exemplos_perguntas_respostas.md` e a [interface](#interface) |
 | Reprodução | [Reprodução](#reprodução) e `docs/reprodutibilidade.md` |
 
 ## Base de dados
@@ -72,7 +72,7 @@ CONSULTA (LangGraph, make api)
   resposta: resumo, afirmações com ids das evidências, evidências com review_id, rastro em Parquet
 ```
 
-O fluxo é um grafo com arestas condicionais explícitas, não um agente livre: o caminho de cada pergunta fica auditável, o número de chamadas ao LLM é fixo (no máximo duas) e a recusa é uma decisão de código. Componentes, estado do grafo e contrato da API estão em `docs/arquitetura.md`.
+A interface Streamlit e a API FastAPI usam o mesmo pipeline. O fluxo é um grafo com arestas condicionais explícitas, não um agente livre: o caminho de cada pergunta fica auditável, o número de chamadas ao LLM é fixo (no máximo duas) e a recusa é uma decisão de código. Componentes, estado do grafo e contrato da API estão em `docs/arquitetura.md`.
 
 ## Tecnologias
 
@@ -85,7 +85,7 @@ O fluxo é um grafo com arestas condicionais explícitas, não um agente livre: 
 | Índice vetorial | faiss-cpu |
 | Temas | BERTopic (UMAP, HDBSCAN), gensim (LDA e coerência c_v) |
 | LLM e orquestração | LangChain (LCEL, saída estruturada com Pydantic), langchain-google-genai (Gemini), LangGraph |
-| API | FastAPI, uvicorn |
+| Interface e API | Streamlit, FastAPI, uvicorn |
 | Gráficos e notebooks | matplotlib, seaborn, JupyterLab |
 | Ambiente e qualidade | uv, ruff, pytest |
 
@@ -142,6 +142,14 @@ O re-ranking e os filtros têm ganhos significativos. A fusão empata com o veto
 
 **Geração e recusa** (notebook 06): fidelidade de 0,96 por afirmação, validade das citações de 0,97 e, nas perguntas de teste, 10 de 10 não respondíveis recusadas e 27 de 29 respondíveis respondidas. Uma avaliação sintética com uma ordem ("ignore as instruções anteriores") foi ignorada nas 3 perguntas testadas (`reports/robustez.md`).
 
+## Interface
+
+`make app` abre a interface em `http://localhost:8501`, com três abas:
+
+- **Perguntar:** perguntas livres ou os exemplos do enunciado. A resposta mostra a decisão (respondida ou recusada, com o motivo), o recorte aplicado e quantas avaliações ele tem, a frequência por tema contada em código, as afirmações com as evidências que as sustentam e cada evidência com nota, data, categoria, situação da entrega e `review_id`. O rastro da consulta mostra a pergunta reescrita, os filtros, os scores da busca e o tempo de cada etapa.
+- **Qualidade medida:** as métricas da avaliação (MRR, fidelidade, validade das citações, recusa) e a ablação da recuperação, lidas dos artefatos versionados.
+- **Auditoria do juiz:** os 120 pares da amostra de auditoria, um por vez, com a nota do juiz escondida até a anotação; a concordância com os dois juízes é calculada a cada par rotulado.
+
 ## Exemplos de perguntas e respostas
 
 Trechos do notebook 07; as respostas completas, com a tabela de evidências e os `review_id`, estão em `reports/exemplos_perguntas_respostas.md`.
@@ -176,7 +184,7 @@ As decisões estão numeradas em `docs/decisoes_analiticas.md`, cada uma com a e
 - grafo determinístico em LangGraph em vez de agente livre (D14);
 - HyDE fora do pipeline, porque não trouxe ganho (D25).
 
-Ficaram fora por decisão: fine-tuning (o RAG atende sem treinar modelo), agente ReAct livre (não determinístico e sem ganho para busca em base única), multimodal (não há imagens na base) e interfaces gráficas (a API com documentação interativa atende à demonstração).
+Ficaram fora por decisão: fine-tuning (o RAG atende sem treinar modelo), agente ReAct livre (não determinístico e sem ganho para busca em base única) e multimodal (não há imagens na base). A interface Streamlit entrou depois da API, para o gestor usar o sistema sem montar requisições (D27).
 
 ## Como executar
 
@@ -186,10 +194,11 @@ Requisitos: Python 3.12 e [uv](https://docs.astral.sh/uv/). Roda em CPU.
 uv sync                 # ou: pip install -r requirements.txt
 cp .env.example .env    # preencher a chave do Gemini e os nomes dos modelos
 make test               # testes
+make app                # interface em http://localhost:8501
 make api                # API em http://127.0.0.1:8000; documentação interativa em /docs
 ```
 
-A base processada, os índices, o mapa de temas, o conjunto de avaliação e os julgamentos estão versionados: a API e os notebooks funcionam sem baixar nem recalcular nada. Para reconstruir do zero:
+A base processada, os índices, o mapa de temas, o conjunto de avaliação e os julgamentos estão versionados: a interface, a API e os notebooks funcionam sem baixar nem recalcular nada. Para reconstruir do zero:
 
 ```bash
 make data               # baixa a base da Olist do Kaggle (exige conta) e confere o manifesto
@@ -253,8 +262,10 @@ Cada limitação vem com o número que a mede:
 │   ├── graph/          fluxo LangGraph, gate de evidência e rastro
 │   ├── evaluation/     julgamento, métricas de recuperação e avaliação da geração
 │   ├── api/            API FastAPI
+│   ├── app/            funções da interface Streamlit
 │   └── visualization/  estilo e rótulos de negócio dos gráficos
-├── tests/              99 testes
+├── tests/              105 testes
+├── app.py              interface Streamlit
 ├── reports/            métricas, ablação, temas, exemplos, robustez, rastros e slides
 ├── images/             figuras dos notebooks
 └── docs/               arquitetura, metodologia, decisões, dicionário de dados, fontes e reprodutibilidade

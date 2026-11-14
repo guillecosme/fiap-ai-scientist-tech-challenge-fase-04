@@ -45,6 +45,7 @@ Registro das decisões do projeto, com o motivo, a evidência e o notebook ou m�
 | D13 | Evidência delimitada e declarada como dado, nunca instrução | uma avaliação sintética com uma ordem foi ignorada nas 3 perguntas testadas | `reports/robustez.md` |
 | D14 | Grafo LangGraph com arestas condicionais, em vez de agente ReAct | caminho auditável, no máximo 2 chamadas ao LLM por pergunta (1,07 em média nas recusas) e recusa decidida por código | notebook 06, `src/graph/fluxo.py` |
 | D15 | Rastro de cada consulta em Parquet | filtros, entradas e scores, decisão, resposta, tempo por etapa e tokens consultáveis depois da execução; base das métricas de operação | `reports/rastros/` |
+| D27 | Interface Streamlit sobre o mesmo pipeline da API | o plano deixava interfaces gráficas de fora, porque a API com documentação interativa bastava para a demonstração; a interface entrou para o gestor usar o sistema sem montar requisições e para a auditoria humana do juiz ser feita com cliques, com a nota do juiz escondida até a anotação | `app.py`, `src/app/servicos.py` |
 | D16 | Provedor configurável por variável de ambiente, com modelo de reserva e cache | troca de modelo sem tocar no pipeline; o cache por hash do prompt evita pagar duas vezes pela mesma chamada | `src/generation/provedor.py` |
 | D20 | Respostas de frequência informam o denominador (avaliações com comentário) | quem comenta é mais insatisfeito que a base: 77% de quem dá nota 1 escreve comentário, contra 36% de quem dá nota 5 (V de Cramér = 0,29). Uma proporção calculada sobre o texto não vale para todos os clientes | notebook 01 |
 
@@ -59,4 +60,3 @@ Registro das decisões do projeto, com o motivo, a evidência e o notebook ou m�
 | Agente ReAct livre | não determinístico e sem ganho para busca numa base única (D14) |
 | Classificador supervisionado de sentimento (Naive Bayes, regressão logística) | a nota do cliente já é o rótulo de satisfação |
 | Multimodal | a base não tem imagens |
-| Interface gráfica | a API com documentação interativa atende à demonstração |

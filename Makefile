@@ -1,4 +1,4 @@
-.PHONY: help setup lint test requirements data base documentos index avaliacao notebooks api clean
+.PHONY: help setup lint test requirements data base documentos index avaliacao notebooks api app clean
 
 PY = uv run python
 
@@ -19,6 +19,7 @@ help:
 	@echo "  avaliacao     pool, julgamento, auditoria, gate e avaliacao da geracao"
 	@echo ""
 	@echo "Uso:"
+	@echo "  app           abre a interface Streamlit em http://localhost:8501"
 	@echo "  api           sobe a API em http://127.0.0.1:8000 (documentacao em /docs)"
 	@echo ""
 	@echo "Notebooks:"
@@ -68,6 +69,9 @@ notebooks:
 	for nb in notebooks/0*.ipynb; do \
 		uv run jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=-1 $$nb || exit 1; \
 	done
+
+app:
+	uv run streamlit run app.py
 
 api:
 	uv run uvicorn src.api.main:app --host 127.0.0.1 --port 8000
