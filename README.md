@@ -6,7 +6,7 @@ Aluno: Guilherme Cosme Malagolini Silveira (RM 372204).
 
 - Apresentação executiva: [reports/slides/RM372204 - Guilherme Cosme - Tech Challenge Fase 04.pdf](<reports/slides/RM372204 - Guilherme Cosme - Tech Challenge Fase 04.pdf>)
 - Pacote da entrega (apresentação em pdf e pptx, links e comprovantes): [reports/slides/RM372204 - Guilherme Cosme - Tech Challenge Fase 04.zip](<reports/slides/RM372204 - Guilherme Cosme - Tech Challenge Fase 04.zip>)
-- Vídeo de apresentação (até 7 min): [LINK_DO_VIDEO](LINK_DO_VIDEO) (também em [reports/slides/links_video_e_github.txt](reports/slides/links_video_e_github.txt))
+- Vídeo de apresentação (até 7 min): [https://www.loom.com/share/564de0c12f7a4898966744875e9fc080](https://www.loom.com/share/564de0c12f7a4898966744875e9fc080) (também em [reports/slides/links_video_e_github.txt](reports/slides/links_video_e_github.txt))
 - Trilha Generative AI Engineering Pathway da Databricks Academy concluída (página My enrollments com os sete cursos e o learning plan como Completed, com nome e conta): [reports/comprovantes/databricks_generative_ai_engineering_pathway.png](reports/comprovantes/databricks_generative_ai_engineering_pathway.png)
 - Certificações AWS em IA e Machine Learning (validação em [aws.amazon.com/verification](https://aws.amazon.com/verification) pelo número de cada certificado):
   - AWS Certified Machine Learning Engineer - Associate, número e26e1a06857a43bd9eff5b7dc9f12e34: [reports/comprovantes/aws_certified_machine_learning_engineer_associate.pdf](reports/comprovantes/aws_certified_machine_learning_engineer_associate.pdf)
